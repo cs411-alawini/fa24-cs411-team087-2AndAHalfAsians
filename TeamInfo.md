@@ -12,8 +12,8 @@
 | Member1     |   ykko2@illinois.edu  |
 | Member2     |     David Liang     |
 | Member2     |  dlian4@illinois.edu |
-| Member3     |                        |
-| Member3     |                        |
+| Member3     |          Rajas Gandhi              |
+| Member3     |        rajasg2@illinois.edu                |
 
 ## Project Information
 
