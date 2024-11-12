@@ -1,0 +1,14 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: evproject-backend-service
+spec:
+  template:
+    spec:
+      containers:
+        - image: us-central1-docker.pkg.dev/fa24-cs411-team087/evproject-backend/evproject-backend:latest
+          env:
+            - name: ENV
+              value: "production"
+          ports:
+            - containerPort: 8080
