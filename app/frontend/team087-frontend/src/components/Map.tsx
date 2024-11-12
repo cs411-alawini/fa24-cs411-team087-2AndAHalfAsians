@@ -3,20 +3,21 @@
 // IMPORTANT: the order matters!
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
-import * as L from 'leaflet';
+// import * as L from 'leaflet';
 import 'leaflet-defaulticon-compatibility';
 
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
-import RoutingMachine from './RoutingMachine';
+// import RoutingMachine from './RoutingMachine';
 
 export default function Map() {
-    const position: LatLngExpression = [33.52001088075479, 36.26829385757446];
+    // Center position near the center of the contiguous United States
+    const position: LatLngExpression = [39.8283, -98.5795];
 
     return (
         <MapContainer
             center={position}
-            zoom={11}
+            zoom={5}  // Set zoom level to show most of the U.S.
             scrollWheelZoom={true}
             style={{ height: "100vh", width: "100vw" }}
         >
@@ -29,7 +30,7 @@ export default function Map() {
                     This Marker icon is displayed correctly with <i>leaflet-defaulticon-compatibility</i>.
                 </Popup>
             </Marker>
-            <RoutingMachine />
+            {/* <RoutingMachine /> */}
         </MapContainer>
     );
 }
