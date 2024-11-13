@@ -1,3 +1,4 @@
+// File needed for local debugging
 {
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
@@ -10,7 +11,7 @@
             "request": "attach",
             "connect": {
                 "host": "localhost",
-                "port": 5678
+                "port": 5678 // Add port to listen on for local debugging
             },
             "pathMappings": [
                 {
