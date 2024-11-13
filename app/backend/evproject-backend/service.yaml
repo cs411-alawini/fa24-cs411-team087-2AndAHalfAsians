@@ -8,6 +8,9 @@ spec:
       containers:
         - image: us-central1-docker.pkg.dev/fa24-cs411-team087/evproject-backend/evproject-backend:latest
           env:
+            - name: PYTHONPATH
+              # value: "/usr/src/app"
+              value: "/app"
             - name: ENV
               value: "production"
           ports:

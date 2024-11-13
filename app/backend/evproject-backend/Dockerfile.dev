@@ -10,5 +10,9 @@ RUN apt-get update && apt-get install -y git vim net-tools build-essential googl
 
 WORKDIR /code
 
+# Add these lines to update the requirements.txt when rebuilding the environment.
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
 ENV PYTHONPATH=/code/src
 ENV PORT 8080
