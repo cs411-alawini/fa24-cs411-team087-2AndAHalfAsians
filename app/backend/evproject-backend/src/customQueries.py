@@ -11,6 +11,32 @@ class Queries():
 	REPEATABLE_READ = 'SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;'
 	SERIALIZABLE = 'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;'
 
+	GET_PLUG_INSTANCES_FROM_STATION = '''
+SELECT
+  *
+FROM 
+  EVStation JOIN HasPlugs
+    ON EVStation.station_id = HasPlugs.station_id
+  JOIN PlugInstance
+    ON HasPlugs.instance_id = PlugInstance.instance_id
+WHERE
+  EVStation.station_id = %(station_id)s;
+'''
+
+
+	ADD_PLUG_INSTANCE = '''
+INSERT INTO
+  PlugInstance(type_id, power_output, in_use, base_price, usage_price)
+VALUES (%(type_id)s, %(power_output)s, %(in_use)s, %(base_price)s, %(usage_price)s);
+'''
+
+	ADD_HAS_PLUGS = '''
+INSERT INTO
+	HasPlugs(station_id, instance_id)
+VALUES (%(station_id)s, %(instance_id)s);
+'''
+
+
 	GET_OWNED_VEHICLES = '''
 SELECT
 	EV.ev_id,

@@ -16,6 +16,13 @@ import os
 #     debugpy.listen(("0.0.0.0", 5678))
 #     debugpy.wait_for_client()
 
+# TODO: Should we pass in a cursor as an argument to nested calls? 
+#   If we call a(a(a(a(params)))) are we making 4 separate cursors which each have their own
+#   connection? If so we could easily run out so it may be better to pass in the existing cursor
+#   if possible. 
+
+# TODO: All these queries will probably explode, should add better error handling
+# TODO: Refactor this into separate routes? It was pretty rough getting the imports to work though with GCP
 
 app = FastAPI()
 
@@ -86,6 +93,56 @@ async def getCompatibleStations(
         for row in cursor:
             results.append(row)
     return results
+
+
+@app.get('/GetPlugInstancesFromStation/')
+async def getPlugInstancesFromStation(
+    station_id: int = Query(..., description='EV Station ID to get instances from')
+):
+
+    with getDBCursor() as cursor:
+        params = {
+            'station_id': station_id
+        }
+        cursor.execute(Queries.GET_PLUG_INSTANCES_FROM_STATION, params)
+        results = cursor.fetchall()
+
+    return results
+
+@app.post('/AddPlugInstance/')
+async def addPlugInstance(
+    station_id: int = Query(..., description='EV Station ID to get instances from'),
+    type_id: int = Query(..., description='The type_id of the charger to add'),
+    power_output: float = Query(..., description='Power output in kW of the charger'),
+    in_use: bool = Query(..., description='Whether or not the instance is in use or not'),
+    base_price: float = Query(..., description='The base price to start charging'),
+    usage_price: float = Query(..., description='The cost to charge per kW/h')
+):
+    
+    with getDBCursor() as cursor:
+
+        # Insert PlugInstance normally using the auto-incremented instance_id
+        insertionParams = {
+            'type_id': type_id,
+            'power_output': power_output,
+            'in_use': in_use,
+            'base_price': base_price,
+            'usage_price': usage_price
+        }
+        
+        cursor.execute(Queries.ADD_PLUG_INSTANCE, insertionParams)
+        instance_id = cursor.lastrowid
+        
+        
+        # Attach PlugInstance to the station with a separate query
+        hasPlugsParams = {
+            'station_id': station_id,
+            'instance_id': instance_id
+        }
+        cursor.execute(Queries.ADD_HAS_PLUGS, hasPlugsParams)
+        
+        return await getPlugInstancesFromStation(station_id)
+
 
 
 @app.get('/OwnedVehicles/')
@@ -242,6 +299,13 @@ async def deleteOwnedVehicle(
         cursor.execute(Queries.DELETE_OWNED_VEHICLE, params)
     
     return await getOwnedVehicles(user_id)
+
+
+
+
+
+
+
 
 # Run me with:
 # uvicorn src.main:app --host 0.0.0.0 --port 8080 --reload
