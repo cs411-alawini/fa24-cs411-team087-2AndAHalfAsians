@@ -24,6 +24,15 @@ WHERE
 '''
 
 
+	GET_RANDOM_EV_STATIONS = '''
+SELECT A.* FROM (
+    SELECT *, RAND() FROM EVStation
+) as A
+ORDER BY RAND()
+LIMIT 200
+'''
+
+
 	ADD_PLUG_INSTANCE = '''
 INSERT INTO
   PlugInstance(type_id, power_output, in_use, base_price, usage_price)

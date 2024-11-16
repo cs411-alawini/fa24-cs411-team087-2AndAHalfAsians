@@ -9,6 +9,7 @@ from mysql.connector import errorcode, Error
 from src.routers.testRouter import router as testRouter
 from src.routers.ownsEVRouters import router as ownsEVRouter
 from src.routers.plugsRouter import router as plugsRouter
+from src.routers.evStationRouter import router as evStationRouter
 import os
 
 # Uncomment this to debug locally
@@ -34,6 +35,10 @@ tagsData = [
     {
         'name': 'PlugInstance',
         'description': 'Endpoints that relate to who owns an EV'
+    },
+    {
+        'name': 'EVStation',
+        'description': 'Endpoints for interacting with the EVStation table'
     }
 ]
 
@@ -58,6 +63,7 @@ app.add_middleware(
 
 app.include_router(ownsEVRouter) # No need to include the prefix kwarg since we defined it in the ownsEVRouter router
 app.include_router(plugsRouter)
+app.include_router(evStationRouter)
 app.include_router(testRouter, prefix='/testRouter')
 
 # Define the API endpoints

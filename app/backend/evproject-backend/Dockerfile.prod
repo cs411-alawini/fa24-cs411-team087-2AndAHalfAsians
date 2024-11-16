@@ -1,26 +1,50 @@
-FROM python:3.10.13
+# FROM python:3.10.13
 
-ENV PYTHONUNBUFFERED True
-ENV ENV production
+# ENV PYTHONUNBUFFERED True
+# ENV ENV production
+
+# WORKDIR /app
+
+# COPY ./requirements.txt ./
+
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# # Update the python path
+# COPY . .
+# RUN touch __init__.py
+# ENV PYTHONPATH=/app:/app/src
+
+
+# # WHY ARE YOU NOT BUILDING
+# RUN echo "Checking directory structure:"
+# RUN ls -la && \ 
+#     ls -la src
+
+# EXPOSE 8080
+
+# # Remove src.main:app and replace with main:app since we are now in src
+# CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers"]
+
+
+
+FROM python:3.10.13
 
 WORKDIR /app
 
-COPY ./requirements.txt ./
+COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Update the python path
-COPY . .
-RUN touch __init__.py
-ENV PYTHONPATH=/app:/app/src
-
-
-# WHY ARE YOU NOT BUILDING
-RUN echo "Checking directory structure:"
-RUN ls -la && \ 
-    ls -la src
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 EXPOSE 8080
 
-# Remove src.main:app and replace with main:app since we are now in src
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers"]
+# COPY ./src /app/src
+COPY . .
+
+RUN echo "Project structure:" && \
+    ls -R /app
+
+ENV PYTHONPATH=/app
+
+
+CMD ["fastapi", "run", "src/main.py", "--port", "8080"]
+# CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080", "--proxy-headers"]
