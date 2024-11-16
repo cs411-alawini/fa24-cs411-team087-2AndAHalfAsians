@@ -1,4 +1,4 @@
-
+# TODO: Refactor this otherwise I will keep adding every query to this one file. I cannot be stopped, I am deranged.
 
 class Queries():
 	
@@ -152,6 +152,3 @@ WHERE
 ORDER BY
 	Distances.distance_km ASC;
 '''
-
-
-	

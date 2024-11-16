@@ -3,27 +3,22 @@ FROM python:3.10.13
 ENV PYTHONUNBUFFERED True
 ENV ENV production
 
-# Update the python path
-# ENV PYTHONPATH=/usr/src/app
-# WORKDIR /usr/src/app
-
-#NEW
 WORKDIR /app
 
 COPY ./requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
-# COPY ./src ./src
 
-# NEW
+# Update the python path
 COPY . .
-ENV PYTHONPATH=/app
+RUN touch __init__.py
+ENV PYTHONPATH=/app:/app/src
 
 
 # WHY ARE YOU NOT BUILDING
 RUN echo "Checking directory structure:"
-# RUN ls -la /usr/src/app
-# RUN ls -la /usr/src/app/src
+RUN ls -la && \ 
+    ls -la src
 
 EXPOSE 8080
 
