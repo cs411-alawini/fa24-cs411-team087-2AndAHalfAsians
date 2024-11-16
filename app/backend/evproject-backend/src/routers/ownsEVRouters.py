@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Query, HTTPException, status
 from pydantic import BaseModel
 from src.db_connection import getDBCursor
-from src.customQueries import Queries
 from mysql.connector import errorcode, Error
+from src.query_loader import load_query
 
 router = APIRouter(
     prefix='/OwnsEV',
@@ -28,7 +28,7 @@ async def getOwnedVehicles(
             'user_id': user_id
         }
         
-        cursor.execute(Queries.GET_OWNED_VEHICLES, params)
+        cursor.execute(load_query('get_owned_vehicles'), params)
         return cursor.fetchall()
 
 
@@ -51,7 +51,7 @@ async def updateOwnedVehicle(
     '''
     
     with getDBCursor() as cursor:
-        cursor.execute(Queries.SERIALIZABLE)
+        cursor.execute(load_query('serializable'))
         params = {
             'user_id': user_id,
             'previous_ev_id': previous_ev_id,
@@ -60,7 +60,7 @@ async def updateOwnedVehicle(
         
         try:
             # Perform update and return new results
-            cursor.execute(Queries.UPDATE_OWNED_VEHICLE, params)
+            cursor.execute(load_query('update_owned_vehicle'), params)
         
         # Need to handle issues like if someone tries to enter a non-existent ev_id
         except Error as e:
@@ -111,7 +111,7 @@ async def insertOwnedVehicle(
     
     with getDBCursor() as cursor:
         # We should be able to insert this whenever, nothing else is probably going to be affected
-        cursor.execute(Queries.READ_UNCOMMITTED)
+        cursor.execute(load_query('read_uncommitted'))
     
         params = {
             'user_id': user_id,
@@ -119,7 +119,7 @@ async def insertOwnedVehicle(
         }
         
         try:
-            cursor.execute(Queries.INSERT_OWNED_VEHICLE, params)
+            cursor.execute(load_query('insert_owned_vehicle'), params)
             
         # Need to handle issues like if someone tries to enter a non-existent ev_id
         except Error as e:
@@ -165,7 +165,7 @@ async def deleteOwnedVehicle(
             'ev_id': ev_id
         }
         
-        cursor.execute(Queries.SERIALIZABLE)
-        cursor.execute(Queries.DELETE_OWNED_VEHICLE, params)
+        cursor.execute(load_query('serializable'))
+        cursor.execute(load_query('delete_owned_vehicle'), params)
     
     return await getOwnedVehicles(user_id)

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Query, HTTPException, status
 from pydantic import BaseModel
-from src.customQueries import Queries
 from src.db_connection import getDBCursor
 from mysql.connector import errorcode, Error
+from src.query_loader import load_query
 
 
 router = APIRouter(
@@ -22,7 +22,7 @@ async def getPlugInstancesFromStation(
         params = {
             'station_id': station_id
         }
-        cursor.execute(Queries.GET_PLUG_INSTANCES_FROM_STATION, params)
+        cursor.execute(load_query('get_plug_instances_from_station'), params)
         results = cursor.fetchall()
 
     return results
@@ -48,7 +48,7 @@ async def addPlugInstance(
             'usage_price': usage_price
         }
         
-        cursor.execute(Queries.ADD_PLUG_INSTANCE, insertionParams)
+        cursor.execute(load_query('add_plug_instance'), insertionParams)
         instance_id = cursor.lastrowid
         
         
@@ -57,7 +57,7 @@ async def addPlugInstance(
             'station_id': station_id,
             'instance_id': instance_id
         }
-        cursor.execute(Queries.ADD_HAS_PLUGS, hasPlugsParams)
+        cursor.execute(load_query('add_has_plugs'), hasPlugsParams)
         
         return await getPlugInstancesFromStation(station_id)
 

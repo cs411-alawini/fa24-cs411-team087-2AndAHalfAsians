@@ -1,19 +1,30 @@
 from fastapi import APIRouter, Query, HTTPException, status
 from pydantic import BaseModel
-from src.customQueries import Queries
 from src.db_connection import getDBCursor
 from mysql.connector import errorcode, Error
+from src.query_loader import load_query
 
 router = APIRouter(
     prefix='/EVStation',
     tags=['EVStation']
 )
 
-@router.get('/getEVStation')
-async def getEVStations():
+class ResponseBody(BaseModel):
+    message: str
+
+@router.get('/getEVStations')
+async def getEVStations(
+    resultsLimit: int = Query(None, description='How many random results to return, if not set, returns all')
+):
+    
+    print(resultsLimit)
     
     with getDBCursor() as cursor:
         
-        cursor.execute(Queries.GET_RANDOM_EV_STATIONS)
+        params = {
+            'resultsLimit': resultsLimit if resultsLimit else 2**32-1
+        }
+        cursor.execute(load_query('get_random_ev_stations'), params)
         
         return cursor.fetchall()
+    

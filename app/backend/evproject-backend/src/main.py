@@ -3,14 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Union
 import uvicorn
 from src.db_connection import DatabaseConnectionPool, getDBCursor
-from src.customQueries import Queries
 from mysql.connector import errorcode, Error
 
-from src.routers.testRouter import router as testRouter
-from src.routers.ownsEVRouters import router as ownsEVRouter
-from src.routers.plugsRouter import router as plugsRouter
-from src.routers.evStationRouter import router as evStationRouter
+from src.query_loader import load_query
+import importlib
+
 import os
+
 
 # Uncomment this to debug locally
 # if os.getenv("ENV") != "production":
@@ -61,10 +60,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(ownsEVRouter) # No need to include the prefix kwarg since we defined it in the ownsEVRouter router
-app.include_router(plugsRouter)
-app.include_router(evStationRouter)
-app.include_router(testRouter, prefix='/testRouter')
+
+# Dynamically load routers
+def include_all_routers(app: FastAPI, routers_dir: str = "src/routers"):
+    """
+    Dynamically discover and include routers from the routers directory.
+    """
+    for file in os.listdir(routers_dir):
+        if file.endswith(".py") and file != "__init__.py":
+            module_name = f"{routers_dir.replace('/', '.')}.{file[:-3]}"
+            module = importlib.import_module(module_name)
+            if hasattr(module, "router"):
+                app.include_router(module.router)
+                print(f"Included router: {module_name}")
+
+include_all_routers(app)
 
 # Define the API endpoints
 @app.get('/')
@@ -108,8 +118,10 @@ async def getCompatibleStations(
             'ev_id': ev_id
         }
         # We don't really care too much about reading messy data here
-        cursor.execute(Queries.READ_UNCOMMITTED)
-        cursor.execute(Queries.Q1, params)
+        cursor.execute(load_query('read_uncommitted'))
+        query = load_query("compatible_stations_query")
+        cursor.execute(query, params)
+        
         results = []
         for row in cursor:
             results.append(row)
