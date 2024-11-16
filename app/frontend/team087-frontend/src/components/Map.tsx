@@ -10,7 +10,7 @@ import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
 // import RoutingMachine from './RoutingMachine';
 
-export default function Map() {
+export default function Map(props: any) {
     // Center position near the center of the contiguous United States
     const position: LatLngExpression = [39.8283, -98.5795];
 
@@ -25,11 +25,11 @@ export default function Map() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <Marker position={position}>
+            {/* <Marker position={position}>
                 <Popup>
                     This Marker icon is displayed correctly with <i>leaflet-defaulticon-compatibility</i>.
                 </Popup>
-            </Marker>
+            </Marker> */}
             {/* <RoutingMachine /> */}
         </MapContainer>
     );

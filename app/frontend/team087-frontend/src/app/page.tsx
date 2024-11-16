@@ -1,17 +1,11 @@
-"use client";
-
 import dynamic from "next/dynamic";
 // import Image from "next/image";
-
-const LazyMap = dynamic(() => import("@/components/Map"), {
-  ssr: false,
-  loading: () => <p>Loading...</p>,
-});
+import MapCaller from "@/components/MapCaller";
 
 export default function Home() {
   return (
     <main>
-      <LazyMap />
+      <MapCaller />
     </main>
   );
 }
