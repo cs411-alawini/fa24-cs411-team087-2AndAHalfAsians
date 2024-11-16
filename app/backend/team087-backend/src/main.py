@@ -10,6 +10,7 @@ from src.routers.ownsEVRouters import router as ownsEVRouter
 from src.routers.plugsRouter import router as plugsRouter
 
 from src.query_loader import QueryLoader
+import importlib
 import os
 
 # Initialize the QueryLoader with the path to the queries folder
@@ -40,9 +41,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(ownsEVRouter)
-app.include_router(plugsRouter)
-app.include_router(testRouter, prefix="/testRouter")
+
+# Dynamically load routers
+def include_all_routers(app: FastAPI, routers_dir: str = "src/routers"):
+    """
+    Dynamically discover and include routers from the routers directory.
+    """
+    for file in os.listdir(routers_dir):
+        if file.endswith(".py") and file != "__init__.py":
+            module_name = f"{routers_dir.replace('/', '.')}.{file[:-3]}"
+            module = importlib.import_module(module_name)
+            if hasattr(module, "router"):
+                app.include_router(module.router)
+                print(f"Included router: {module_name}")
+
+
+include_all_routers(app)
 
 
 # Define the API endpoints
