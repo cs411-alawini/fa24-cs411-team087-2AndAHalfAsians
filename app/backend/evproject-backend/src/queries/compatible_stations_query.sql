@@ -6,11 +6,14 @@ SELECT
 	PlugInstance.in_use,
 	PlugInstance.base_price,
 	PlugInstance.usage_price,
+	EVStation.name,
 	EVStation.address,
 	EVStation.state,
 	EVStation.zip,
 	EVStation.latitude,
 	EVStation.longitude,
+	EVStation.city,
+	EVStation.phone,
 	ROUND((SELECT battery_capacity FROM ElectricVehicle WHERE ev_id=%(ev_id)s) / PlugInstance.power_output, 2) AS time_to_charge_hr,
 	ROUND(base_price +
 	ROUND((SELECT battery_capacity FROM ElectricVehicle WHERE ev_id=%(ev_id)s), 2) * usage_price
