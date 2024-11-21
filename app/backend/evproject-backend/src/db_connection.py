@@ -10,7 +10,7 @@ import mysql.connector.cursor
 class DatabaseConnectionPool:
 
     _connectionPool = None
-    _poolSize = 3
+    _poolSize = 10
     
     # The @classmethod decorator lets us interact easily with the class variables.
     # Class variables are different from instance variables since they are shared

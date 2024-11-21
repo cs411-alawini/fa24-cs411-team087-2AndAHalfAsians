@@ -5,17 +5,38 @@
 // import Image from "next/image";
 import { useState } from "react";
 import MapCaller from "@/components/MapCaller";
-import TestText from "@/components/TestText";
+import CompatibleStationsForm from "@/components/CompatibleStationsForm";
 import { CompatibleEVStation } from "@/interfaces/interfaces";
+import DropdownList from "@/components/DropDownSelector";
+import OwnsEVForm from "@/components/OwnsEVForm";
 
 
 export default function Home() {
   const [stations, setStations] = useState<CompatibleEVStation[]>([]);
+  const [currentSelection, onSelectionChange] = useState('CompatibleStationsForm')
+
+  const renderForm = () => {
+    switch (currentSelection) {
+      case "CompatibleStationsForm":
+        return <CompatibleStationsForm onResultsUpdate={setStations}/>;
+      case "OwnsEVForm":
+        return <OwnsEVForm />;
+      default:
+        return null;
+    }
+  }
+
 
   return (
     <main className="relative">
       <MapCaller props={stations} />
-      <TestText onResultsUpdate={setStations}/>
+      <div className="absolute top-1 left-10">
+        <DropdownList 
+          currentSelection={currentSelection}
+          onSelectionChange={onSelectionChange}/>
+      </div>
+
+      {renderForm()}
     </main>
   );
 }

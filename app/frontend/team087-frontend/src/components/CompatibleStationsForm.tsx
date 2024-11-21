@@ -2,14 +2,15 @@
 
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { CompatibleEVStation, getCompatibleStations } from '@/interfaces/interfaces';
+import QueryResults from './QueryResults';
 
 // Define how we pass out the collected results to be displayed on the map
-interface TestTextCompatibleStationProps {
+interface CompatibleStationsFormProps {
     onResultsUpdate: (result: CompatibleEVStation[]) => void;
 }
 
 // Add our function here which will be sent to the parent
-export default function TestText({ onResultsUpdate }: TestTextCompatibleStationProps) {
+export default function CompatibleStationsForm({ onResultsUpdate }: CompatibleStationsFormProps) {
     // Set the schema for the frontend form
     const [formData, setFormData] = useState({
         latitude: '34.040539',
@@ -17,6 +18,9 @@ export default function TestText({ onResultsUpdate }: TestTextCompatibleStationP
         distance_threshold: '10',
         ev_id: '34'
     });
+    const [queryResults, setQueryResults] = useState<CompatibleEVStation[] | null>(null);
+    const [showResults, setShowResults] = useState(false);
+
 
     // Update all fields as needed
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +36,8 @@ export default function TestText({ onResultsUpdate }: TestTextCompatibleStationP
         e.preventDefault();
         const results = await getCompatibleStations(formData.latitude, formData.longitude, formData.distance_threshold, formData.ev_id);
         onResultsUpdate(results);
+        setQueryResults(results);
+        setShowResults(true);
     };
     // TODO: Maybe define some styles? It took forever to figure out how to make this thing not look stupid
     return (
@@ -101,6 +107,10 @@ export default function TestText({ onResultsUpdate }: TestTextCompatibleStationP
                     Submit
                 </button>
             </form>
+
+            <QueryResults
+                results={queryResults}
+                isVisible={showResults} />
         </div>
     );
 }

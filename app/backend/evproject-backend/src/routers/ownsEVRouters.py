@@ -147,7 +147,8 @@ async def insertOwnedVehicle(
                         }
                     }
                 )
-        raise e
+            raise e
+
 
     
     return await getOwnedVehicles(user_id)
