@@ -1,0 +1,5 @@
+*.pyc
+__pycache__/
+
+# Ignore PDF file that keeps changing for some reason
+*.Identifier

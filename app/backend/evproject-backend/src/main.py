@@ -38,6 +38,10 @@ tagsData = [
     {
         'name': 'EVStation',
         'description': 'Endpoints for interacting with the EVStation table'
+    },
+    {
+        'name': 'CustomQueries',
+        'description': 'All custom queries developed for stage 3. Non-CRUD queries.'
     }
 ]
 
@@ -82,62 +86,6 @@ def health(request: Request):
     return {
         "message": f"Application is running! Visit {str(request.url)}docs for endpoint access."
     }
-
-
-# Example local connection URL for this endpoint
-# localhost:8080/CompatibleStations/?latutude=34.040539&longitude=-118.271387&distance_threshold=40&ev_id=34
-# Example deployed connection URL
-# http://localhost:8080/CompatibleStations/?latitude=34.040539&longitude=-118.271387&distance_threshold=40&ev_id=34
-@app.get("/CompatibleStations/")
-async def getCompatibleStations(
-    latitude: float = Query(..., description='Latitude of first point', ge=-90, le=90),
-    longitude: float = Query(..., description='Longitude of first point', ge=-180, le=180),
-    distance_threshold: float = Query(..., description='Range to search for vehicles'),
-    ev_id: int = Query(..., description='ev_id of the vehicle'),
-):
-    '''
-    An endpoint which gets all compatible EV Stations with some given ev_id, a
-    location with lat/long and a distance threshold to search over.
-    
-    Arguments:
-        latitude: Current latitude
-        longitude: Current longitude
-        distance_threshold: How many km to return results from
-        ev_id: EV ID to filter for compatible plugs
-    
-    Returns:
-        A list of records fetched meeting the constraints. 
-        Returned attributes are defined from the Q1 returns.
-    '''
-    
-    with getDBCursor() as cursor:
-        params = {
-            'latitude': latitude,
-            'longitude': longitude,
-            'distance_threshold': distance_threshold,
-            'ev_id': ev_id
-        }
-        # We don't really care too much about reading messy data here
-        cursor.execute(load_query('read_uncommitted'))
-        query = load_query("compatible_stations_query")
-        cursor.execute(query, params)
-        
-        results = []
-        for row in cursor:
-            results.append(row)
-    return results
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # Run me with:
