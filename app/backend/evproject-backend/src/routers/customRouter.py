@@ -21,10 +21,10 @@ class ResponseBody(BaseModel):
 # http://localhost:8080/CompatibleStations/?latitude=34.040539&longitude=-118.271387&distance_threshold=40&ev_id=34
 @router.get("/CompatibleStations/")
 async def getCompatibleStations(
-    latitude: float = Query(..., description='Latitude of first point', ge=-90, le=90),
-    longitude: float = Query(..., description='Longitude of first point', ge=-180, le=180),
-    distance_threshold: float = Query(..., description='Range to search for vehicles'),
-    ev_id: int = Query(..., description='ev_id of the vehicle'),
+    latitude: float = Query(34.040539, description='Latitude of first point', ge=-90, le=90),
+    longitude: float = Query(-118.271387, description='Longitude of first point', ge=-180, le=180),
+    distance_threshold: float = Query(40, description='Range to search for vehicles'),
+    ev_id: int = Query(34, description='ev_id of the vehicle'),
 ):
     '''
     An endpoint which gets all compatible EV Stations with some given ev_id, a
@@ -42,17 +42,23 @@ async def getCompatibleStations(
     '''
     
     with getDBCursor() as cursor:
-        params = {
+        
+        # Get the parameters for the procedure itself
+        procedureParams = {
             'latitude': latitude,
             'longitude': longitude,
             'distance_threshold': distance_threshold,
+            'target_table': 'EVStation'
+        }
+        
+        queryParams = {
             'ev_id': ev_id
         }
         
         # We don't really care too much about reading messy data here
         cursor.execute(load_query('read_uncommitted'))
-        query = load_query("compatible_stations_query")
-        cursor.execute(query, params)
+        cursor.execute(load_query("haversine_distances_procedure"), procedureParams)
+        cursor.execute(load_query("compatible_stations_query"), queryParams)
         
         results = []
         for row in cursor:
@@ -77,16 +83,23 @@ async def getCongestionScore(
     
     with getDBCursor() as cursor:
         
-        params = {
+        procedureParams = {
             'latitude': latitude,
             'longitude': longitude,
             'distance_threshold': distance_threshold,
-            'hour_range': hour_range,
-            'current_hour': current_hour
+            'target_table': 'TrafficStation'
         }
         
-        cursor.execute(load_query('get_congestion_scores'), params)
+        queryParams = {
+            'hour_range': hour_range,
+            'current_hour': current_hour,
+            'distance_threshold': distance_threshold,
+        }
         
+        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query("haversine_distances_procedure"), procedureParams)
+        cursor.execute(load_query('get_congestion_scores'), queryParams)
+
         return cursor.fetchall()
 
 

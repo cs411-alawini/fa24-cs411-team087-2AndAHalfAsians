@@ -1,0 +1,1 @@
+CALL HaversineDistance(%(latitude)s, %(longitude)s, %(distance_threshold)s, %(target_table)s);
