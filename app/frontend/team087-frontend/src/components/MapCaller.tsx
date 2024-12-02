@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { CompatibleEVStation } from '@/interfaces/interfaces';
-import dynamic from 'next/dynamic';
+import { CompatibleEVStation } from "@/interfaces/interfaces";
+import dynamic from "next/dynamic";
 // import { JSX } from 'react';
 
 interface MapCallerProps {

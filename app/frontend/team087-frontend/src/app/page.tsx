@@ -1,42 +1,54 @@
-'use client'
+"use client";
 
-// I guess GCR doesn't let us build if we don't use an import
-// import dynamic from "next/dynamic";
-// import Image from "next/image";
 import { useState } from "react";
+import { useUser } from "@/providers/UserProvider";
 import MapCaller from "@/components/MapCaller";
 import CompatibleStationsForm from "@/components/CompatibleStationsForm";
 import { CompatibleEVStation } from "@/interfaces/interfaces";
 import DropdownList from "@/components/DropDownSelector";
 import OwnsEVForm from "@/components/OwnsEVForm";
-
+import CurrentUser from "@/components/ui/CurrentUser";
+import UserModal from "@/components/ui/UserModal";
 
 export default function Home() {
-  const [stations, setStations] = useState<CompatibleEVStation[]>([]);
-  const [currentSelection, onSelectionChange] = useState('CompatibleStationsForm')
+    const { userId } = useUser(); // Access userId from UserProvider
+    const [stations, setStations] = useState<CompatibleEVStation[]>([]);
+    const [currentSelection, onSelectionChange] = useState(
+        "CompatibleStationsForm"
+    );
 
-  const renderForm = () => {
-    switch (currentSelection) {
-      case "CompatibleStationsForm":
-        return <CompatibleStationsForm onResultsUpdate={setStations}/>;
-      case "OwnsEVForm":
-        return <OwnsEVForm />;
-      default:
+    const renderForm = () => {
+        switch (currentSelection) {
+            case "CompatibleStationsForm":
+                return <CompatibleStationsForm onResultsUpdate={setStations} />;
+            case "OwnsEVForm":
+                return <OwnsEVForm />;
+            default:
+                return null;
+        }
+    };
+
+    // If no user is logged in, render the UserModal and hide the page content
+    if (!userId) {
         return null;
     }
-  }
 
+    // Render the page content after the user is logged in
+    return (
+        <main>
+            <MapCaller props={stations} />
 
-  return (
-    <main className="relative">
-      <MapCaller props={stations} />
-      <div className="absolute top-1 left-10">
-        <DropdownList 
-          currentSelection={currentSelection}
-          onSelectionChange={onSelectionChange}/>
-      </div>
+            <div className="absolute top-1 left-10">
+                <DropdownList
+                    currentSelection={currentSelection}
+                    onSelectionChange={onSelectionChange}
+                />
+            </div>
 
-      {renderForm()}
-    </main>
-  );
+            {/* Display the current logged-in user */}
+            <CurrentUser />
+
+            {renderForm()}
+        </main>
+    );
 }

@@ -1,39 +1,79 @@
-import { CompatibleEVStation, ElectricVehicle } from '@/interfaces/interfaces';
-import React from 'react';
+"use client";
 
-// TODO: Refactor this with generics so we don't have to keep adding types here
+import React from "react";
+import { CompatibleEVStation, ElectricVehicle } from "@/interfaces/interfaces";
+import { Modal, Box, ScrollArea, Text, Divider, Button } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+
 interface QueryResultsProps {
-  results: CompatibleEVStation[] | ElectricVehicle[] | null;
-  isVisible: boolean;
+    results: CompatibleEVStation[] | ElectricVehicle[] | null;
 }
 
-const QueryResults = ({ results, isVisible }: QueryResultsProps) => {
-  if (!isVisible || !results) return null;
+const QueryResults = ({ results }: QueryResultsProps) => {
+    const [opened, { open, close }] = useDisclosure(false);
 
-  const resultsArray = Array.isArray(results) ? results : [results];
+    if (!results) return null;
 
-  return (
-    <div className="fixed bottom-4 left-4 min-w-[450px] max-w-[600px] max-h-2xl bg-white bg-opacity-95 p-4 rounded-lg shadow-lg z-[1000]">
-        <div className="flex mt-0 justify-between items-center mb-4">
-            <h2 className="text-lg"><b>Query Results</b></h2>
-            <span className="text-sm text-gray-500">
-                {resultsArray.length} {resultsArray.length === 1 ? 'result' : 'results'}
-            </span>
-        </div>
+    const resultsArray = Array.isArray(results) ? results : [results];
 
-        <div className="overflow-auto max-h-80 font-mono text-sm">
-            {resultsArray.map((item, index) => (
-            <div 
-                key={index}
-                className="mb-2 p-2 m-2 bg-gray-50 rounded border border-gray-400">
-                <pre>
-                    {JSON.stringify(item, null, 2)}
-                </pre>
-            </div>
-            ))}
-        </div>
-    </div>
-  );
+    return (
+        <>
+            {/* Trigger Button */}
+            <Button
+                onClick={open}
+                variant="outline"
+                style={{ marginBottom: 16 }}
+            >
+                Show Query Results
+            </Button>
+
+            {/* Results Modal */}
+            <Modal
+                opened={opened}
+                onClose={close}
+                title={
+                    <Text fw={700} size="lg">
+                        Query Results
+                    </Text>
+                }
+                size="lg"
+                centered
+            >
+                <Box>
+                    <Text size="sm" c="dimmed" ta="right">
+                        {resultsArray.length}{" "}
+                        {resultsArray.length === 1 ? "result" : "results"}
+                    </Text>
+                </Box>
+
+                <Divider my="sm" />
+
+                <ScrollArea style={{ maxHeight: 400 }}>
+                    {resultsArray.map((item, index) => (
+                        <Box
+                            key={index}
+                            style={{
+                                marginBottom: "0.75rem",
+                                padding: "1rem",
+                                backgroundColor: "#f9f9f9",
+                                borderRadius: "8px",
+                                border: "1px solid #ddd",
+                            }}
+                        >
+                            <pre
+                                style={{
+                                    fontFamily: "monospace",
+                                    fontSize: "0.9rem",
+                                }}
+                            >
+                                {JSON.stringify(item, null, 2)}
+                            </pre>
+                        </Box>
+                    ))}
+                </ScrollArea>
+            </Modal>
+        </>
+    );
 };
 
 export default QueryResults;
