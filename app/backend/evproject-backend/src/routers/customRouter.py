@@ -114,6 +114,7 @@ async def getCongestionScore():
     
     with getDBCursor() as cursor:
         
+        cursor.execute(load_query('read_uncommitted'))
         cursor.execute(load_query('get_owners_of_multiple_evs'))
         
         return cursor.fetchall()
@@ -141,6 +142,9 @@ async def getEVStationsWithHighestNumberOfAvailablePlugs(
             'distance_threshold': distance_threshold
         }
         
+        # We actually want to get committed stuff here since we don't want to say a plug is available
+        # when it actually isn't
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query('get_evstations_with_highest_number_of_available_plugs'), params)
         
         return cursor.fetchall()

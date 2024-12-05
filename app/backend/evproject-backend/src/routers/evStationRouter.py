@@ -24,6 +24,8 @@ async def getEVStations(
         params = {
             'resultsLimit': resultsLimit if resultsLimit else 2**32-1
         }
+        
+        cursor.execute(load_query('read_uncommitted'))
         cursor.execute(load_query('get_random_ev_stations'), params)
         
         return cursor.fetchall()
