@@ -46,6 +46,10 @@ tagsData = [
     {
         'name': 'User',
         'description': 'All user-related queries'
+    },
+    {
+        'name': 'ElectricVehicle',
+        'description': 'All ElectricVehicle related queries'
     }
 ]
 

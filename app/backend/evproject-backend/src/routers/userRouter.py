@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from src.db_connection import getDBCursor
 from mysql.connector import errorcode, Error
 from src.query_loader import load_query
-from src.utils import genericInsertQuery
+from src.utils import genericInsertQuery, genericUpdateQuery, genericReadQuery, genericDeleteQuery
 
 router = APIRouter(
     prefix='/User',
@@ -13,8 +13,10 @@ router = APIRouter(
 class ResponseBody(BaseModel):
     message: str
 
+TABLE = 'User'
 
-@router.post('/AddUser/')
+
+@router.post(f'/Add{TABLE}/')
 async def addUser(
     username: str = Query(..., description='username'),
     email: str = Query(..., description='email'),
@@ -34,7 +36,8 @@ async def addUser(
     with getDBCursor() as cursor:
 
         cursor.execute(load_query('read_uncommitted'))
-        cursor.execute(genericInsertQuery('User', argumentsDict=params), params)
+        cursor.execute(genericInsertQuery(table=TABLE, params=params), params)
+        # Get the auto-incremented user_id with cursor.lastrowid
         user_id = cursor.lastrowid
 
     return await getUserByUserId(user_id=user_id)
@@ -42,7 +45,7 @@ async def addUser(
 
 
 
-@router.get('/GetUserByUserId')
+@router.get(f'/Get{TABLE}ByUserId/')
 async def getUserByUserId(
     user_id: int = Query(1, description='The user to get by id')
 ):
@@ -52,14 +55,14 @@ async def getUserByUserId(
     with getDBCursor() as cursor:
 
         cursor.execute(load_query('read_committed'))
-        cursor.execute(load_query('get_user_by_user_id', query_path='queries/User'), params)
+        cursor.execute(genericReadQuery(table=TABLE, key='user_id'), params)
 
         results = cursor.fetchall()
 
     return results
 
 
-@router.get('/GetUserByUsername')
+@router.get(f'/Get{TABLE}ByUsername/')
 async def getUserByUsername(
     username: str = Query('WilMendez63', description='The user to get by username')
 ):
@@ -69,43 +72,36 @@ async def getUserByUsername(
     with getDBCursor() as cursor:
         
         cursor.execute(load_query('read_committed'))
-        cursor.execute(load_query('get_user_by_username', query_path='queries/User'), params)
+        cursor.execute(genericReadQuery(table=TABLE, key='username'), params)
         
         results = cursor.fetchall()
 
     return results
 
 
-@router.put('/UpdateUser/')
+@router.put(f'/Update{TABLE}/')
 async def updateUser(
-    user_id: int = Query(1, description='user_name'),
-    username: str = Query(None, description='username'),
-    email: str = Query(None, description='email'),
-    password: str = Query(None, description='password'),
-    ssn: str = Query(None, description='ssn'),
-    address: str = Query(None, description='address'),
-    state: str = Query(None, description='state'),
-    city: str = Query(None, description='city'),
-    zip: int = Query(None, description='zip'),
-    first_name: str = Query(None, description='first_name'),
-    last_name: str = Query(None, description='last_name'),
-    middle_initial: str = Query(None, description='middle_initial'),
-    creation_date: str = Query(None, description='creation_date')
+    user_id: int = Query(..., description='user_id'),
+    username: str = Query(..., description='username'),
+    email: str = Query(..., description='email'),
+    password: str = Query(..., description='password'),
+    ssn: str = Query(..., description='ssn'),
+    address: str = Query(..., description='address'),
+    state: str = Query(..., description='state'),
+    city: str = Query(..., description='city'),
+    zip: int = Query(..., description='zip'),
+    first_name: str = Query(..., description='first_name'),
+    last_name: str = Query(..., description='last_name'),
+    middle_initial: str = Query(..., description='middle_initial'),
+    creation_date: str = Query(..., description='creation_date')
 ):
     
     updateParams = {key: value for key, value in locals().items() if key != 'self'}
     
     with getDBCursor() as cursor:
         
-        filledFields = {k: v for k, v in updateParams.items() if v is not None}
-        setClauses = [f'{field} = %({value})s' for field, value in filledFields.items()]
-        
         # Construct an update query to only include non-None values
-        UPDATE_QUERY = f'''
-        UPDATE User
-        SET {', '.join(setClauses)}
-        WHERE user_id = %(user_id)s
-        '''
+        UPDATE_QUERY = genericUpdateQuery(table=TABLE, key='user_id', params=updateParams)
         
         cursor.execute(load_query('serializable'))
         cursor.execute(UPDATE_QUERY, updateParams)
@@ -113,7 +109,7 @@ async def updateUser(
     return await getUserByUserId(user_id=user_id)
 
 
-@router.delete('/DeleteUser/')
+@router.delete(f'/Delete{TABLE}/')
 async def deleteUser(
     user_id: int = Query(..., description='ID of the user to delete')
 ):
@@ -123,6 +119,6 @@ async def deleteUser(
     with getDBCursor() as cursor:
         
         cursor.execute(load_query('serializable'))
-        cursor.execute(load_query('delete_user', query_path='queries/User'), deleteParams)
+        cursor.execute(genericDeleteQuery(table=TABLE, key='user_id'), deleteParams)
     
     return {'message': f'User with user_id {user_id} deleted successfully'}
