@@ -58,7 +58,7 @@ async def getCompatibleStations(
         # We don't really care too much about reading messy data here
         cursor.execute(load_query('read_uncommitted'))
         cursor.execute(load_query("haversine_distances_procedure"), procedureParams)
-        cursor.execute(load_query("compatible_stations_query"), queryParams)
+        cursor.execute(load_query("compatible_stations_query", query_path='queries/Custom'), queryParams)
         
         results = []
         for row in cursor:
@@ -97,8 +97,8 @@ async def getCongestionScore(
         }
         
         cursor.execute(load_query('read_uncommitted'))
-        cursor.execute(load_query("haversine_distances_procedure"), procedureParams)
-        cursor.execute(load_query('get_congestion_scores'), queryParams)
+        cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
+        cursor.execute(load_query('get_congestion_scores', query_path='queries/Custom'), queryParams)
 
         return cursor.fetchall()
 
@@ -115,7 +115,7 @@ async def getCongestionScore():
     with getDBCursor() as cursor:
         
         cursor.execute(load_query('read_uncommitted'))
-        cursor.execute(load_query('get_owners_of_multiple_evs'))
+        cursor.execute(load_query('get_owners_of_multiple_evs', query_path='queries/Custom'))
         
         return cursor.fetchall()
     
@@ -145,7 +145,7 @@ async def getEVStationsWithHighestNumberOfAvailablePlugs(
         # We actually want to get committed stuff here since we don't want to say a plug is available
         # when it actually isn't
         cursor.execute(load_query('read_committed'))
-        cursor.execute(load_query('get_evstations_with_highest_number_of_available_plugs'), params)
+        cursor.execute(load_query('get_evstations_with_highest_number_of_available_plugs', query_path='queries/Custom'), params)
         
         return cursor.fetchall()
 

@@ -29,7 +29,7 @@ async def getEVStations(
         }
         
         cursor.execute(load_query('read_uncommitted'))
-        cursor.execute(load_query('get_random_ev_stations'), params)
+        cursor.execute(load_query('get_random_ev_stations', query_path='queries/Misc'), params)
         
         return cursor.fetchall()
     
