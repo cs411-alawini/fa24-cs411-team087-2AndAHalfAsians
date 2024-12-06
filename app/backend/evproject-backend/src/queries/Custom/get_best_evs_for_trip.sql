@@ -2,9 +2,7 @@ SELECT
 EVStationCounts.ev_station_city,
 EVStationCounts.type_id,
 EVStationCounts.type_count,
-ElectricVehicle.make,  
-ElectricVehicle.model,  
-ElectricVehicle.range_km,  
+ElectricVehicle.*,
 ROUND(ElectricVehicle.battery_capacity / EVStationCounts.avg_power_output, 2) AS time_to_charge_hr,  
 ROUND(  
     (EVStationCounts.avg_base_price +  
