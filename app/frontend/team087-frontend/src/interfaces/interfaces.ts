@@ -1,5 +1,7 @@
 // Define interfaces for individual tables/queries as needed
 
+import { BASE_URL } from "@/lib/query";
+
 // Basic interface for the EVStation table
 export interface EVStation {
     station_id: number;
@@ -50,7 +52,7 @@ export const getCompatibleStations = async (
     distance_threshold: string,
     ev_id: string
 ): Promise<CompatibleEVStation[]> => {
-    const apiURL: string = `https://evproject-backend-service-410247726474.us-central1.run.app/CompatibleStations/?latitude=${latitude}&longitude=${longitude}&distance_threshold=${distance_threshold}&ev_id=${ev_id}`;
+    const apiURL: string = `${BASE_URL}/CustomQueries/CompatibleStations/?latitude=${latitude}&longitude=${longitude}&distance_threshold=${distance_threshold}&ev_id=${ev_id}`;
     const response = await fetch(apiURL);
     console.log("Endpoint Hit", apiURL);
     console.log("Raw response", response);

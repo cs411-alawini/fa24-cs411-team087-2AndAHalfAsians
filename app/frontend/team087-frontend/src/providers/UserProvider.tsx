@@ -2,6 +2,8 @@
 
 // providers/UserProvider.tsx
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { User, UserArray } from "@/schemas";
+import { BASE_URL } from "@/lib/query";
 
 interface UserContextType {
     userId: string | null;
@@ -10,6 +12,36 @@ interface UserContextType {
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
+
+/**
+ * Fetch user details by user ID.
+ * @param userId - The ID of the user to fetch.
+ * @returns A User object if successful, or null if an error occurs.
+ */
+export const fetchUser = async (userId: string): Promise<User | null> => {
+    try {
+        const response = await fetch(
+            `${BASE_URL}/User/GetUserByUserId/?user_id=${userId}`,
+            {
+                headers: {
+                    Accept: "application/json",
+                },
+            }
+        );
+
+        if (response.ok) {
+            const userData = await response.json();
+            const validatedUserData = UserArray.parse(userData); // Validate response
+            return validatedUserData[0];
+        } else {
+            console.error("Failed to fetch user:", response.statusText);
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        return null;
+    }
+};
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
@@ -22,7 +54,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         if (storedUserId) {
             setUserIdState(storedUserId);
         }
-        setLoading(false); // Stop loading once the user ID is checked
+        setLoading(false);
     }, []);
 
     const setUserId = (id: string | null) => {

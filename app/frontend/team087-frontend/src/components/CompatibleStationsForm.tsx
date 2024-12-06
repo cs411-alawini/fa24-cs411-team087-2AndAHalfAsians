@@ -26,6 +26,8 @@ export default function CompatibleStationsForm({
     const [queryResults, setQueryResults] = useState<
         CompatibleEVStation[] | null
     >(null);
+
+    // eslint-disable-next-line
     const [showResults, setShowResults] = useState(false);
 
     // Update all fields as needed

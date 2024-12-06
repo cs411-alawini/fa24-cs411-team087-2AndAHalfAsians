@@ -1,20 +1,25 @@
 "use client";
 
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
     ColorSchemeScript,
-    LoadingOverlay,
+    // LoadingOverlay,
     MantineProvider,
 } from "@mantine/core";
 import { theme } from "@/lib/theme";
 import { UserProvider, useUser } from "@/providers/UserProvider";
-import UserModal from "@/components/ui/UserModal";
+import UserModal from "@/components/common/UserModal";
 
-import { useEffect, useState } from "react";
-import type { Metadata } from "next";
+// import { useEffect, useState } from "react";
+// import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import CurrentUser from "@/components/common/CurrentUser";
+import { queryClient } from "@/lib/query";
+import { Notifications } from "@mantine/notifications";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -50,11 +55,17 @@ export default function RootLayout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <MantineProvider theme={theme}>
-                    <UserProvider>
-                        <LoginCheck>{children}</LoginCheck>
-                    </UserProvider>
-                </MantineProvider>
+                <QueryClientProvider client={queryClient}>
+                    <MantineProvider theme={theme}>
+                        <UserProvider>
+                            <LoginCheck>
+                                <Notifications />
+                                {children}
+                                <CurrentUser />
+                            </LoginCheck>
+                        </UserProvider>
+                    </MantineProvider>
+                </QueryClientProvider>
             </body>
         </html>
     );

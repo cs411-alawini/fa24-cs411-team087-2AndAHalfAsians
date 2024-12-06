@@ -1,7 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Modal, TextInput, Button, Stack, LoadingOverlay } from "@mantine/core";
+import {
+    Modal,
+    TextInput,
+    Button,
+    Stack,
+    // LoadingOverlay
+} from "@mantine/core";
 import { useUser } from "@/providers/UserProvider";
 
 const UserModal: React.FC = () => {
