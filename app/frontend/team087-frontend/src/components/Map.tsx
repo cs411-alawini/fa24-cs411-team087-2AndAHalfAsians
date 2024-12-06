@@ -76,11 +76,11 @@ export default function Map({ props, props1 }: MapProps) {
                     key={index}
                     position={
                         [
-                            35.040539,
-                            -118.271387,
+                            // 35.040539,
+                            // -118.271387,
                             // TODO: Update the coordinates to the actual coordinates based on when the data is available
-                            // station.latitude,
-                            // station.longitude,
+                            station.latitude,
+                            station.longitude,
                         ] as LatLngExpression
                     }
                 >
@@ -93,7 +93,7 @@ export default function Map({ props, props1 }: MapProps) {
                             <h3>{"Distance: " + station.distance_km + " km"}</h3>
                             <h3>{"Average Volume: " + station.avg_volume}</h3>
                             <h3>
-                                {"Congestion Score: " + station.congestion_score}
+                                {"Congestion Score: " + station.CongestionScore}
                             </h3>
                         </div>
                     </Popup>

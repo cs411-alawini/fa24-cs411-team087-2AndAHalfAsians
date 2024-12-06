@@ -50,8 +50,10 @@ export interface CongestionScore {
     ev_station_id: number;
     ev_state_code: string;
     distance_km: number;
+    latitude: number;
+    longitude: number;
     avg_volume: number;
-    congestion_score: number;
+    CongestionScore: number;
 }
 
 // TODO: Refactor these URLs because this is gonna get ugly after a while
