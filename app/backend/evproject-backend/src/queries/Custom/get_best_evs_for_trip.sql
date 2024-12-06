@@ -1,7 +1,7 @@
 SELECT  
-EVStationCounts.ev_station_city,  
-EVStationCounts.type_id,  
-EVStationCounts.type_count,  
+EVStationCounts.ev_station_city,
+EVStationCounts.type_id,
+EVStationCounts.type_count,
 ElectricVehicle.make,  
 ElectricVehicle.model,  
 ElectricVehicle.range_km,  
@@ -47,7 +47,6 @@ SELECT * FROM
             longitude  
             BETWEEN %(city1_longitude)s - (%(distance_threshold)s/(111.0 * COS(RADIANS(%(city1_latitude)s))))  
                 AND %(city1_longitude)s + (%(distance_threshold)s/(111.0 * COS(RADIANS(%(city1_latitude)s))))  
-            AND EVStation.city = %(city1)s  
     ) AS Distances1  
     JOIN HasPlugs HP  
         ON HP.station_id = Distances1.ev_station_id  
@@ -91,7 +90,6 @@ UNION
             longitude  
             BETWEEN %(city2_longitude)s - (%(distance_threshold)s/(111.0 * COS(RADIANS(%(city2_latitude)s))))  
                 AND %(city2_longitude)s + (%(distance_threshold)s/(111.0 * COS(RADIANS(%(city2_latitude)s))))  
-            AND EVStation.city = %(city2)s  
     ) AS Distances2  
     JOIN HasPlugs HP  
         ON HP.station_id = Distances2.ev_station_id  

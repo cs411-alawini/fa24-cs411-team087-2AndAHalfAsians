@@ -13,9 +13,6 @@ router = APIRouter(
 
 class ResponseBody(BaseModel):
     message: str
-    
-
-
 
 # Example local connection URL for this endpoint
 # localhost:8080/CompatibleStations/?latutude=34.040539&longitude=-118.271387&distance_threshold=40&ev_id=34
@@ -238,13 +235,11 @@ async def getEVStationsWithHighestNumberOfAvailablePlugs(
 
 @router.get('/GetBestElectricVehiclesForTrip/')
 async def getBestElectricVehiclesForTrip(
-    city1:str = Query('Los Angeles', description='Start city'),
-    city2:str = Query('San Francisco', description='End city'),
     city1_latitude:float = Query(34.0549, description='Start city lat', ge=-90, le=90),
     city1_longitude:float = Query(-118.2426, description='Start city long', ge=-180, le=180),
     city2_latitude:float = Query(37.7749, description='End city lat', ge=-90, le=90),
     city2_longitude:float = Query(-122.4194, description='End city long', ge=-180, le=180),
-    distance_threshold: float = Query(40, description='Range to consider for EVStations')
+    distance_threshold: float = Query(10, description='Range to consider for EVStations')
 ):
 
     params = {key: value for key, value in locals().items() if key != 'self'}
