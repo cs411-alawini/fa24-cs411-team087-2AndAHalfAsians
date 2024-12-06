@@ -57,7 +57,7 @@ async def getCompatibleStations(
         
         # We don't really care too much about reading messy data here
         cursor.execute(load_query('read_uncommitted'))
-        cursor.execute(load_query("haversine_distances_procedure"), procedureParams)
+        cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
         cursor.execute(load_query("compatible_stations_query", query_path='queries/Custom'), queryParams)
         
         results = []
