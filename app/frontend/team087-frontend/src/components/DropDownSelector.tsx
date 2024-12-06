@@ -21,6 +21,7 @@ function DropdownList({
                     Compatible Stations
                 </option>
                 <option value="OwnsEVForm">Electric Vehicle Ownership</option>
+                <option value="CongestionScoreForm">Congestion Score</option>
             </select>
         </div>
     );

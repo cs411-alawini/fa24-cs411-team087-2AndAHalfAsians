@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { CompatibleEVStation, ElectricVehicle } from "@/interfaces/interfaces";
+import { CompatibleEVStation, CongestionScore, ElectricVehicle } from "@/interfaces/interfaces";
 import { Modal, Box, ScrollArea, Text, Divider, Button } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 interface QueryResultsProps {
-    results: CompatibleEVStation[] | ElectricVehicle[] | null;
+    results: CompatibleEVStation[] | ElectricVehicle[] | CongestionScore[] | null;
 }
 
 const QueryResults = ({ results }: QueryResultsProps) => {

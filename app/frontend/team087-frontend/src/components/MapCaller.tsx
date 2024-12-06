@@ -1,11 +1,12 @@
 "use client";
 
-import { CompatibleEVStation } from "@/interfaces/interfaces";
+import { CompatibleEVStation, CongestionScore } from "@/interfaces/interfaces";
 import dynamic from "next/dynamic";
 // import { JSX } from 'react';
 
 interface MapCallerProps {
     props: CompatibleEVStation[];
+    props1: CongestionScore[];
 }
 
 const LazyMap = dynamic(() => import("@/components/Map"), {
@@ -13,8 +14,9 @@ const LazyMap = dynamic(() => import("@/components/Map"), {
     loading: () => <p>Loading...</p>,
 });
 
-function MapCaller({ props }: MapCallerProps) {
-    return <LazyMap props={props} />;
+function MapCaller({ props, props1 }: MapCallerProps) {
+    // TODO: update the way that props are passed to the map, a little jank right now?
+    return <LazyMap props={props} props1={props1} />;
 }
 
 export default MapCaller;
