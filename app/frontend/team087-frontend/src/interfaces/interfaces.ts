@@ -45,6 +45,15 @@ export interface CompatibleEVStation {
     price_to_charge: number;
 }
 
+// Specific interface for the congestion score results (Q2)
+export interface CongestionScore {
+    ev_station_id: number;
+    ev_state_code: string;
+    distance_km: number;
+    avg_volume: number;
+    congestion_score: number;
+}
+
 // TODO: Refactor these URLs because this is gonna get ugly after a while
 export const getCompatibleStations = async (
     latitude: string,
@@ -60,6 +69,22 @@ export const getCompatibleStations = async (
     console.log("JSON results", results);
     return results;
 };
+
+export const getCongestionScore = async (
+    latitude: string,
+    longitude: string,
+    distance_threshold: string,
+    hour_range: string,
+    hour_of_day: string 
+): Promise<CongestionScore[]> => {
+    const apiURL: string = `${BASE_URL}/CustomQueries/CongestionScore/?latitude=${latitude}&longitude=${longitude}&distance_threshold=${distance_threshold}&hour_range=${hour_range}&current_hour=${hour_of_day}`;
+    const response = await fetch(apiURL);
+    console.log("Endpoint Hit", apiURL);
+    console.log("Raw response", response);
+    const results = response.json();
+    console.log("JSON results", results);
+    return results;
+}
 
 export const executeOwnsEVQuery = async (
     mode: string,

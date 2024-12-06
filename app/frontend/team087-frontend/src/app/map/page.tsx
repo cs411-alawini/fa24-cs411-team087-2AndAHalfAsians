@@ -4,15 +4,17 @@ import { useState } from "react";
 import { useUser } from "@/providers/UserProvider";
 import MapCaller from "@/components/MapCaller";
 import CompatibleStationsForm from "@/components/CompatibleStationsForm";
-import { CompatibleEVStation } from "@/interfaces/interfaces";
+import { CompatibleEVStation, CongestionScore } from "@/interfaces/interfaces";
 import DropdownList from "@/components/DropDownSelector";
 import OwnsEVForm from "@/components/OwnsEVForm";
 import CurrentUser from "@/components/common/CurrentUser";
+import CongestionScoreForm from "@/components/CongestionScoreForm";
 // import UserModal from "@/components/common/UserModal";
 
 export default function MapPage() {
     const { userId } = useUser(); // Access userId from UserProvider
     const [stations, setStations] = useState<CompatibleEVStation[]>([]);
+    const [stations1, setStations1] = useState<CongestionScore[]>([]);
     const [currentSelection, onSelectionChange] = useState(
         "CompatibleStationsForm"
     );
@@ -21,6 +23,8 @@ export default function MapPage() {
         switch (currentSelection) {
             case "CompatibleStationsForm":
                 return <CompatibleStationsForm onResultsUpdate={setStations} />;
+            case "CongestionScoreForm":
+                return <CongestionScoreForm onResultsUpdate={setStations1}/>;
             case "OwnsEVForm":
                 return <OwnsEVForm />;
             default:
@@ -36,7 +40,7 @@ export default function MapPage() {
     // Render the page content after the user is logged in
     return (
         <main>
-            <MapCaller props={stations} />
+            <MapCaller props={stations} props1={stations1}/>
 
             <div className="absolute top-1 left-10">
                 <DropdownList
