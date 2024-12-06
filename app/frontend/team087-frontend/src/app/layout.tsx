@@ -5,7 +5,6 @@ import "@mantine/notifications/styles.css";
 
 import React from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
     ColorSchemeScript,
     // LoadingOverlay,
@@ -60,7 +59,7 @@ export default function RootLayout({
     const [showDevtools, setShowDevtools] = React.useState(true);
 
     React.useEffect(() => {
-        // @ts-expect-error
+        // @ts-expect-error It is what it is 
         window.toggleDevtools = () => setShowDevtools((old) => !old);
     }, []);
 
@@ -84,7 +83,7 @@ export default function RootLayout({
                     </MantineProvider>
                     {showDevtools && (
                         <React.Suspense fallback={null}>
-                            <ReactQueryDevtoolsProduction initialIsOpen />
+                            <ReactQueryDevtoolsProduction />
                         </React.Suspense>
                     )}
                 </QueryClientProvider>

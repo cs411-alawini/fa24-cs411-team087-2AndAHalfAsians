@@ -62,3 +62,39 @@ export async function getCompatibleStations(
         throw error;
     }
 }
+
+import {
+    GetBestElectricVehiclesForTripParams,
+    GetBestElectricVehiclesForTripResults,
+} from "@/interfaces/interfaces";
+
+export async function getBestElectricVehiclesForTrip(
+    data: GetBestElectricVehiclesForTripParams
+): Promise<GetBestElectricVehiclesForTripResults[]> {
+    try {
+        const params = new URLSearchParams({
+            city1_latitude: data.city1_latitude.toString(),
+            city1_longitude: data.city1_longitude.toString(),
+            city2_latitude: data.city2_latitude.toString(),
+            city2_longitude: data.city2_longitude.toString(),
+            distance_threshold: data.distance_threshold.toString(),
+        });
+
+        const response = await fetch(
+            `${BASE_URL}/CustomQueries/GetBestElectricVehiclesForTrip/?${params.toString()}`
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Error fetching best EVs for trip: ${response.statusText}`
+            );
+        }
+
+        const results: GetBestElectricVehiclesForTripResults[] =
+            await response.json();
+        return results;
+    } catch (error) {
+        console.error("Failed to fetch best EVs for trip:", error);
+        throw error;
+    }
+}

@@ -18,7 +18,7 @@ export default function Map({ children }: { children: React.ReactNode }) {
             center={position}
             zoom={5} // Set zoom level to show most of the U.S.
             scrollWheelZoom={true}
-            style={{ height: "50vh" }}
+            style={{ height: "100%" }}
         >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

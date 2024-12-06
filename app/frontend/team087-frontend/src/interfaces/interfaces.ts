@@ -148,3 +148,25 @@ export const executeOwnsEVQuery = async (
 
     return data;
 };
+
+export interface GetBestElectricVehiclesForTripResults {
+    ev_station_city: string;
+    type_id: number;
+    type_count: number;
+    ev_id: number;
+    make: string;
+    model: string;
+    plug_type: number;
+    range_km: number;
+    battery_capacity: number;
+    time_to_charge_hr: number;
+    expected_charge_cost_per_hundred_km: number;
+}
+
+export interface GetBestElectricVehiclesForTripParams {
+    city1_latitude: number;
+    city1_longitude: number;
+    city2_latitude: number;
+    city2_longitude: number;
+    distance_threshold: number;
+}

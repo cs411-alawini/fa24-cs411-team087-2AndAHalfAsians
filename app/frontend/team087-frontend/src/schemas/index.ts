@@ -102,3 +102,16 @@ export const NewVehicleSchema = z.object({
 });
 
 export type NewVehicle = z.infer<typeof NewVehicleSchema>;
+
+// Best EVs for Trip
+export const GetBestElectricVehiclesForTripSchema = z.object({
+    city1_latitude: z.number().min(-90).max(90),
+    city1_longitude: z.number().min(-180).max(180),
+    city2_latitude: z.number().min(-90).max(90),
+    city2_longitude: z.number().min(-180).max(180),
+    distance_threshold: z.number().min(0),
+});
+
+export type GetBestElectricVehiclesForTripParams = z.infer<
+    typeof GetBestElectricVehiclesForTripSchema
+>;

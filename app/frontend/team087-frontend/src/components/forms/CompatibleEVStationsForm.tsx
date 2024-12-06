@@ -11,13 +11,16 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { getCompatibleStations } from "@/lib/data/EVStation";
 import { CompatibleEVStation } from "@/interfaces/interfaces";
+import { LatLng } from "leaflet";
 
 interface CompatibleEVStationsFormProps {
+    selectedLocation: LatLng;
     onStationsFetched: (stations: CompatibleEVStation[]) => void;
     ownedVehicles?: ElectricVehicle[];
 }
 
 export default function CompatibleEVStationsFormComponent({
+    selectedLocation,
     onStationsFetched,
     ownedVehicles,
 }: CompatibleEVStationsFormProps) {
@@ -25,9 +28,9 @@ export default function CompatibleEVStationsFormComponent({
         useForm<CompatibleEVStationsForm>({
             resolver: zodResolver(CompatibleEVStationsSchema),
             defaultValues: {
-                latitude: "34.040539",
-                longitude: "-118.271387",
-                distance_threshold: "10",
+                latitude: selectedLocation.lat.toString(),
+                longitude: selectedLocation.lng.toString(),
+                distance_threshold: "100",
                 ev_id: "", // Initialize with an empty string
             },
         });
@@ -43,6 +46,8 @@ export default function CompatibleEVStationsFormComponent({
     });
 
     const onSubmit = (data: CompatibleEVStationsForm) => {
+        data.longitude = selectedLocation.lng.toString(); // Update longitude
+        data.latitude = selectedLocation.lat.toString(); // Update latitude
         mutation.mutate(data); // Trigger mutation with form data
     };
 
@@ -52,12 +57,16 @@ export default function CompatibleEVStationsFormComponent({
                 <TextInput
                     label="Latitude"
                     placeholder="Enter latitude"
+                    value={selectedLocation.lat.toString()}
+                    disabled
                     {...register("latitude")}
                     error={formState.errors.latitude?.message}
                 />
                 <TextInput
                     label="Longitude"
                     placeholder="Enter longitude"
+                    value={selectedLocation.lng.toString()}
+                    disabled
                     {...register("longitude")}
                     error={formState.errors.longitude?.message}
                 />
