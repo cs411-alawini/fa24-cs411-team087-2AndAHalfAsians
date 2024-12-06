@@ -42,6 +42,14 @@ tagsData = [
     {
         'name': 'CustomQueries',
         'description': 'All custom queries developed for stage 3. Non-CRUD queries.'
+    },
+    {
+        'name': 'User',
+        'description': 'All user-related queries'
+    },
+    {
+        'name': 'ElectricVehicle',
+        'description': 'All ElectricVehicle related queries'
     }
 ]
 

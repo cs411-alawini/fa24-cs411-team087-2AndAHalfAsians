@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from src.db_connection import getDBCursor
 from mysql.connector import errorcode, Error
 from src.query_loader import load_query
+from src.utils import genericInsertQuery
 
 router = APIRouter(
     prefix='/OwnsEV',
@@ -11,6 +12,8 @@ router = APIRouter(
 
 class ResponseBody(BaseModel):
     message: str
+
+TABLE = 'OwnsEV'
 
 @router.get('/GetOwnedVehicles/')
 async def getOwnedVehicles(
@@ -23,13 +26,12 @@ async def getOwnedVehicles(
         user_id: The user id
     '''
     
+    params = {key: value for key, value in locals().items() if key != 'self'}
+
     with getDBCursor() as cursor:
-        params = {
-            'user_id': user_id
-        }
         
         cursor.execute(load_query('read_committed'))
-        cursor.execute(load_query('get_owned_vehicles'), params)
+        cursor.execute(load_query('get_owned_vehicles', query_path='queries/OwnsEV'), params)
         return cursor.fetchall()
 
 
@@ -50,18 +52,13 @@ async def updateOwnedVehicle(
     Returns:
         All of the user's owned EVs which reflects the updated change
     '''
-    
+    params = {key: value for key, value in locals().items() if key != 'self'}
+
     with getDBCursor() as cursor:
-        params = {
-            'user_id': user_id,
-            'previous_ev_id': previous_ev_id,
-            'new_ev_id': new_ev_id
-        }
-        
         try:
             # Perform update and return new results
             cursor.execute(load_query('serializable'))
-            cursor.execute(load_query('update_owned_vehicle'), params)
+            cursor.execute(load_query('update_owned_vehicle', query_path='queries/OwnsEV'), params)
         
         # Need to handle issues like if someone tries to enter a non-existent ev_id
         except Error as e:
@@ -110,17 +107,14 @@ async def insertOwnedVehicle(
         All of the user's owned EVs which reflects the updated change
     '''
     
-    with getDBCursor() as cursor:
+    params = {key: value for key, value in locals().items() if key != 'self'}
     
-        params = {
-            'user_id': user_id,
-            'ev_id': ev_id
-        }
+    with getDBCursor() as cursor:
         
         try:
             # We should be able to insert this whenever, nothing else is probably going to be affected
             cursor.execute(load_query('read_uncommitted'))
-            cursor.execute(load_query('insert_owned_vehicle'), params)
+            cursor.execute(genericInsertQuery(table=TABLE, params=params), params)
             
         # Need to handle issues like if someone tries to enter a non-existent ev_id
         except Error as e:
@@ -158,14 +152,12 @@ async def deleteOwnedVehicle(
     user_id: int = Query(..., description='ID of the user'),
     ev_id: int = Query(..., description='ID of the EV to delete'),
 ):
-    with getDBCursor() as cursor:
     
-        params = {
-            'user_id': user_id,
-            'ev_id': ev_id
-        }
+    params = {key: value for key, value in locals().items() if key != 'self'}
+
+    with getDBCursor() as cursor:
         
         cursor.execute(load_query('serializable'))
-        cursor.execute(load_query('delete_owned_vehicle'), params)
+        cursor.execute(load_query('delete_owned_vehicle', query_path='queries/OwnsEV'), params)
     
     return await getOwnedVehicles(user_id)
