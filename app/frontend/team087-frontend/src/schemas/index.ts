@@ -1,4 +1,3 @@
-export { EVStationSchema } from "./EVStationSchema";
 export { TrafficStationSchema } from "./TrafficStationSchema";
 export { PlugTypeSchema } from "./PlugTypeSchema";
 export { OwnsEVSchema } from "./OwnsEVSchema";
@@ -47,3 +46,59 @@ export const User = z.object({
 export type User = z.infer<typeof User>;
 
 export const UserArray = z.array(User);
+
+// EVStations Schema
+export const EVStation = z.object({
+    station_id: z.number().optional(),
+    name: z.string().max(100).optional(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    state: z.string().length(2).optional(),
+    zip: z.string().max(10).optional(),
+    city: z.string().max(100).optional(),
+    address: z.string().max(100).optional(),
+    phone: z.string().max(100).optional(),
+});
+
+export type EVStation = z.infer<typeof EVStation>;
+
+export const EVStationArray = z.array(EVStation);
+
+// Compatible EV Stations Schema
+export const CompatibleEVStationsSchema = z.object({
+    latitude: z
+        .string()
+        .regex(/^-?\d+(\.\d+)?$/, "Invalid latitude")
+        .min(1),
+    longitude: z
+        .string()
+        .regex(/^-?\d+(\.\d+)?$/, "Invalid longitude")
+        .min(1),
+    distance_threshold: z
+        .string()
+        .regex(/^\d+$/, "Must be a valid number")
+        .min(1),
+    ev_id: z.string().regex(/^\d+$/, "Must be a valid number").min(1),
+});
+
+export type CompatibleEVStationsForm = z.infer<
+    typeof CompatibleEVStationsSchema
+>;
+
+// OwnsVehicle and NewVehicle
+export const OwnedVehicleSchema = z.object({
+    user_id: z.number().int(),
+    ev_id: z.number().int(),
+});
+
+export type OwnedVehicle = z.infer<typeof OwnedVehicleSchema>;
+
+export const NewVehicleSchema = z.object({
+    make: z.string().max(100),
+    model: z.string().max(100),
+    plug_type: z.number().int(),
+    range_km: z.number().int(),
+    battery_capacity: z.number(),
+});
+
+export type NewVehicle = z.infer<typeof NewVehicleSchema>;

@@ -1,40 +1,64 @@
-// src/api/EVStations.ts
+import { BASE_URL } from "@/lib/query";
 
-export interface EVStation {
-    station_id: number;
-    name: string;
-    latitude: number;
-    longitude: number;
-    state: string;
-    zip: string;
-    city: string;
-    address: string;
-    phone: string;
-    RAND: number;
-}
-
-// Define the base URL for the backend API
-const BASE_URL =
-    "https://evproject-backend-service-41https://evproject-backend-service-410247726474.us-central1.run.app/EVStation/getEVStations?resultsLimit=1000247726474.us-central1.run.app";
+import { CompatibleEVStationsForm, EVStationArray } from "@/schemas";
+import { CompatibleEVStation } from "@/interfaces/interfaces";
 
 /**
  * Fetch EV Stations from the backend API.
- * @returns A promise that resolves to an array of EVStation objects.
+ * @returns An array of EVStation objects.
  */
-export const getEVStations = async (): Promise<EVStation[]> => {
+export async function getEVStations() {
     try {
         const response = await fetch(
-            `${BASE_URL}/EVStation/getEVStations?resultsLimit=1`
+            `${BASE_URL}/EVStation/getEVStations/?resultsLimit=1`
         );
         if (!response.ok) {
             throw new Error(
                 `Error fetching EV stations: ${response.statusText}`
             );
         }
-        const data: EVStation[] = await response.json();
-        return data;
+        const data = await response.json();
+
+        const stations = EVStationArray.parse(data);
+        return stations;
     } catch (error) {
         console.error("Failed to fetch EV stations:", error);
         throw error;
     }
-};
+}
+
+export async function getCompatibleStations(
+    data: CompatibleEVStationsForm
+): Promise<CompatibleEVStation[]> {
+    try {
+        // Destructure the data object
+        const { latitude, longitude, distance_threshold, ev_id } = data;
+
+        // Construct query parameters using URLSearchParams
+        const params = new URLSearchParams({
+            latitude,
+            longitude,
+            distance_threshold,
+            ev_id,
+        });
+
+        // Perform the fetch request with constructed query string
+        const response = await fetch(
+            `${BASE_URL}/CustomQueries/CompatibleStations/?${params.toString()}`
+        );
+
+        // Check if the response is successful
+        if (!response.ok) {
+            throw new Error(
+                `Error fetching EV stations: ${response.statusText}`
+            );
+        }
+
+        // Parse and return the JSON response
+        const stations: CompatibleEVStation[] = await response.json();
+        return stations;
+    } catch (error) {
+        console.error("Failed to fetch compatible EV stations:", error);
+        throw error;
+    }
+}

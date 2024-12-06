@@ -21,8 +21,8 @@ const CurrentUser: React.FC = () => {
             withCloseButton={false} // No close button as dialog is always visible
             size="md"
             radius="md"
-            position={{ bottom: 16, left: 16 }}
-            zIndex={400}
+            position={{ top: 16, right: 16 }}
+            zIndex={1000}
         >
             <Text size="lg" fw={500} mb="sm">
                 Current User
