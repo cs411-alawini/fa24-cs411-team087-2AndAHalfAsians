@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from src.db_connection import getDBCursor
 from mysql.connector import errorcode, Error
 from src.query_loader import load_query
+from src.utils import haversine, softmax
+import numpy as np
 
 router = APIRouter(
     prefix='/CustomQueries',
@@ -102,6 +104,87 @@ async def getCongestionScore(
 
         return cursor.fetchall()
 
+
+@router.get("/CongestionScoreForEVStations/")
+async def getCongestionScore(
+    latitude: float = Query(34.040539, description='Target latitude', ge=-90, le=90),
+    longitude: float = Query(-118.271387, description='Target longitude', ge=-180, le=180),
+    distance_threshold: float = Query(40, description='Range to consider for congestion'),
+    hour_range: int = Query(2, description='How many hours to average over from the current hour'),
+    current_hour: int = Query(14, description='The current hour of the day from 0-23'),
+    max_congestion_value_range: float = Query(..., description='The max value of the congestion value returned for easy experimentaiton')
+):
+    
+    '''
+    Computes an estimated congestion score for the actual EVStation based on the congestion score
+    for the TrafficStations.
+    '''
+    
+    with getDBCursor() as cursor:
+        
+        procedureParams = {
+            'latitude': latitude,
+            'longitude': longitude,
+            'distance_threshold': distance_threshold,
+            'target_table': 'TrafficStation'
+        }
+        
+        queryParams = {
+            'hour_range': hour_range,
+            'current_hour': current_hour,
+            'distance_threshold': distance_threshold,
+        }
+        
+        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
+        cursor.execute(load_query('get_congestion_scores', query_path='queries/Custom'), queryParams)
+
+        trafficStationResults = cursor.fetchall()
+        
+        
+        procedureParams = {
+            'latitude': latitude,
+            'longitude': longitude,
+            'distance_threshold': distance_threshold,
+            'target_table': 'EVStation'
+        }
+        cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
+        cursor.execute(load_query('get_ev_stations_in_range', query_path='queries/Custom'))
+        evStationResults = cursor.fetchall()
+        print('@@@DATA LENGTH: ', len(evStationResults))
+        
+        lats = np.array([r['latitude'] for r in trafficStationResults], dtype=np.float32)
+        longs = np.array([r['longitude'] for r in trafficStationResults], dtype=np.float32)
+        congestionScores = np.array([r['CongestionScore'] for r in trafficStationResults])
+
+        weightedCongestionScores = []
+        for evStation in evStationResults:
+            station_id = evStation['ev_station_id']
+            tLat = np.float32(evStation['latitude'])
+            tLng = np.float32(evStation['longitude'])
+
+            distances = haversine(tLat, tLng, lats, longs)
+            
+            # Negate distances to give more weight to small distances
+            # Also use temperature for smoother distribution
+            weights = softmax(-distances, temp=5)
+            weightedCongestionScore = np.dot(congestionScores, weights)
+        
+            evStation['CongestionScore'] = weightedCongestionScore
+            weightedCongestionScores.append(weightedCongestionScore)
+        
+        weightedCongestionScores = np.interp(weightedCongestionScores,
+                                             (np.min(weightedCongestionScores), np.max(weightedCongestionScores)),
+                                             (1, max_congestion_value_range))
+        
+        for r, wcs in zip(evStationResults, weightedCongestionScores):
+            r['CongestionScore'] = wcs
+        
+        return evStationResults
+
+        
+
+    
 
 @router.get("/OwnersOfMultipleEVs/")
 async def getCongestionScore():
