@@ -98,20 +98,22 @@ def genericDeleteQuery(table:str, key:str):
     return query
 
 
-def haversine(lat1:float, long1:float, lat2s:np.ndarray, long2s:np.ndarray):
+def haversine(tLats:np.ndarray, tLongs:np.ndarray, eLats:np.ndarray, eLongs:np.ndarray):
     """
     Calculate haversine distance
     Slightly modified from https://stackoverflow.com/questions/4913349/haversine-formula-in-python-bearing-and-distance-between-two-gps-points
     """
     # Convert decimal degrees to radians
-    lat1, long1 = np.radians(lat1), np.radians(long1)
-    lat2, long2 = np.radians(lat2s), np.radians(long2s)
-    dlon = long2 - long1 
-    dlat = lat2 - lat1
-    a = np.sin(dlat/2)**2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon/2)**2
+    lat1, long1 = np.radians(tLats), np.radians(tLongs)
+    lat2, long2 = np.radians(eLats), np.radians(eLongs)
+    
+    dlat = lat2.reshape(-1, 1) - lat1
+    dlon = long2.reshape(-1, 1) - long1 
+
+    a = np.sin(dlat/2)**2 + np.cos(lat1.reshape(1, -1)) * np.cos(lat2.reshape(-1, 1)) * np.sin(dlon/2)**2
     c = 2 * np.arcsin(np.sqrt(a)) 
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles. Determines return value units.
     return c * r
 
 def softmax(x, temp):
-    return np.exp(x/temp) / (np.sum(np.exp(x/temp)))
+    return np.exp(x/temp) / (np.sum(np.exp(x/temp), axis=1))[:, None]

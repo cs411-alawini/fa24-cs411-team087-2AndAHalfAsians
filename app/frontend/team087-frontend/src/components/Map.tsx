@@ -8,17 +8,19 @@ import "leaflet-defaulticon-compatibility";
 
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import { LatLngExpression } from "leaflet";
-import { CompatibleEVStation } from "@/interfaces/interfaces";
+import { CompatibleEVStation, CongestionScore } from "@/interfaces/interfaces";
 // import RoutingMachine from './RoutingMachine';
 
 interface MapProps {
     props: CompatibleEVStation[];
+    props1: CongestionScore[];
 }
 
-export default function Map({ props }: MapProps) {
+export default function Map({ props, props1 }: MapProps) {
     // Center position near the center of the contiguous United States
     const position: LatLngExpression = [39.8283, -98.5795];
     console.log("Props:", props);
+    console.log("Props1:", props1);
     return (
         <MapContainer
             center={position}
@@ -64,6 +66,34 @@ export default function Map({ props }: MapProps) {
                             <h3>
                                 {"Estimated charge cost: $" +
                                     station.price_to_charge}
+                            </h3>
+                        </div>
+                    </Popup>
+                </Marker>
+            ))}
+            {props1.map((station: CongestionScore, index: number) => (
+                <Marker
+                    key={index}
+                    position={
+                        [
+                            // 35.040539,
+                            // -118.271387,
+                            // TODO: Update the coordinates to the actual coordinates based on when the data is available
+                            station.latitude,
+                            station.longitude,
+                        ] as LatLngExpression
+                    }
+                >
+                    <Popup>
+                        <div>
+                            <b>
+                                <h1>{station.ev_station_id}</h1>
+                            </b>
+                            <h3>{station.ev_state_code}</h3>
+                            <h3>{"Distance: " + station.distance_km + " km"}</h3>
+                            <h3>{"Average Volume: " + station.avg_volume}</h3>
+                            <h3>
+                                {"Congestion Score: " + station.CongestionScore}
                             </h3>
                         </div>
                     </Popup>
