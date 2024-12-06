@@ -19,9 +19,7 @@ TABLE = 'EVStation'
 async def getEVStations(
     resultsLimit: int = Query(None, description='How many random results to return, if not set, returns all')
 ):
-    
-    print(resultsLimit)
-    
+        
     with getDBCursor() as cursor:
         
         params = {

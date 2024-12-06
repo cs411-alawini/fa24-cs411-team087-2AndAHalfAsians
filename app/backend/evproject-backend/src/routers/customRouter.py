@@ -58,6 +58,7 @@ async def getCompatibleStations(
         }
         
         # We don't really care too much about reading messy data here
+        # Plus we really need to not block stuff since we're grabbing a bunch of records
         cursor.execute(load_query('read_uncommitted'))
         cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
         cursor.execute(load_query("compatible_stations_query", query_path='queries/Custom'), queryParams)
@@ -189,7 +190,7 @@ async def getCongestionScore(
     
 
 @router.get("/OwnersOfMultipleEVs/")
-async def getCongestionScore():
+async def getOwnersOfMultipleEvs():
     
     '''
     Gets a list of TrafficStation near a given latitude and longitude. Each TrafficStation contributes
@@ -233,4 +234,24 @@ async def getEVStationsWithHighestNumberOfAvailablePlugs(
         cursor.execute(load_query('get_evstations_with_highest_number_of_available_plugs', query_path='queries/Custom'), params)
         
         return cursor.fetchall()
+    
 
+@router.get('/GetBestElectricVehiclesForTrip/')
+async def getBestElectricVehiclesForTrip(
+    city1:str = Query('Los Angeles', description='Start city'),
+    city2:str = Query('San Francisco', description='End city'),
+    city1_latitude:float = Query(34.0549, description='Start city lat', ge=-90, le=90),
+    city1_longitude:float = Query(-118.2426, description='Start city long', ge=-180, le=180),
+    city2_latitude:float = Query(37.7749, description='End city lat', ge=-90, le=90),
+    city2_longitude:float = Query(-122.4194, description='End city long', ge=-180, le=180),
+    distance_threshold: float = Query(40, description='Range to consider for EVStations')
+):
+
+    params = {key: value for key, value in locals().items() if key != 'self'}
+
+    with getDBCursor() as cursor:
+        
+        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('get_best_evs_for_trip', query_path='queries/Custom'), params)
+        
+        return cursor.fetchall()
