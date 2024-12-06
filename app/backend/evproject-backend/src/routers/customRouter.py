@@ -112,7 +112,8 @@ async def getCongestionScore(
     distance_threshold: float = Query(40, description='Range to consider for congestion'),
     hour_range: int = Query(2, description='How many hours to average over from the current hour'),
     current_hour: int = Query(14, description='The current hour of the day from 0-23'),
-    max_congestion_value_range: float = Query(..., description='The max value of the congestion value returned for easy experimentaiton')
+    max_congestion_value_range: float = Query(127, description='The max value of the congestion value returned for easy experimentaiton'),
+    softmax_temp: float = Query(5, description='The temperature for the softmax when computing weights')
 ):
     
     '''
@@ -136,9 +137,10 @@ async def getCongestionScore(
         }
         
         cursor.execute(load_query('read_uncommitted'))
+
+        # Compute distances from current location to all TrafficStations and get congestion scores
         cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
         cursor.execute(load_query('get_congestion_scores', query_path='queries/Custom'), queryParams)
-
         trafficStationResults = cursor.fetchall()
         
         
@@ -146,37 +148,37 @@ async def getCongestionScore(
             'latitude': latitude,
             'longitude': longitude,
             'distance_threshold': distance_threshold,
-            'target_table': 'EVStation'
+            'target_table': 'EVStation' # Change target_table
         }
+        
+        # Compute coordinates for all EVStations in range of the current query
         cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
         cursor.execute(load_query('get_ev_stations_in_range', query_path='queries/Custom'))
         evStationResults = cursor.fetchall()
-        print('@@@DATA LENGTH: ', len(evStationResults))
         
-        lats = np.array([r['latitude'] for r in trafficStationResults], dtype=np.float32)
-        longs = np.array([r['longitude'] for r in trafficStationResults], dtype=np.float32)
+        # Extract latitude and longitude from EVStations
+        evStationLatLong = np.array([(np.float32(s['latitude']), np.float32(s['longitude'])) for s in evStationResults])
+        
+        # Extract latitude and longitude info from trafficStations
+        tLats = np.array([r['latitude'] for r in trafficStationResults], dtype=np.float32)
+        tLongs = np.array([r['longitude'] for r in trafficStationResults], dtype=np.float32)
         congestionScores = np.array([r['CongestionScore'] for r in trafficStationResults])
-
-        weightedCongestionScores = []
-        for evStation in evStationResults:
-            station_id = evStation['ev_station_id']
-            tLat = np.float32(evStation['latitude'])
-            tLng = np.float32(evStation['longitude'])
-
-            distances = haversine(tLat, tLng, lats, longs)
-            
-            # Negate distances to give more weight to small distances
-            # Also use temperature for smoother distribution
-            weights = softmax(-distances, temp=5)
-            weightedCongestionScore = np.dot(congestionScores, weights)
         
-            evStation['CongestionScore'] = weightedCongestionScore
-            weightedCongestionScores.append(weightedCongestionScore)
-        
+        weightedCongestionScores = np.zeros((len(evStationResults)))
+
+        distances = haversine(tLats, tLongs, evStationLatLong[:, 0], evStationLatLong[:, 1])
+
+        # Negate distances to give more weight to small distances
+        # Also use temperature for smoother distribution
+        weights = softmax(-distances, temp=softmax_temp)
+
+        # Weight and sum congestion scores by new weights
+        weightedCongestionScores = congestionScores @ weights.T
+
         weightedCongestionScores = np.interp(weightedCongestionScores,
-                                             (np.min(weightedCongestionScores), np.max(weightedCongestionScores)),
-                                             (1, max_congestion_value_range))
-        
+                                                (np.min(weightedCongestionScores), np.max(weightedCongestionScores)),
+                                                (1, max_congestion_value_range))
+
         for r, wcs in zip(evStationResults, weightedCongestionScores):
             r['CongestionScore'] = wcs
         
