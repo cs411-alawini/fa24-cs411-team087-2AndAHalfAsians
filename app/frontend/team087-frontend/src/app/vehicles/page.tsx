@@ -15,7 +15,7 @@ import {
     Grid,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { ElectricVehicle } from "@/schemas";
+import { ElectricVehicle, OwnedVehicle, NewVehicle } from "@/schemas";
 import { fetchOwnedVehicles } from "@/lib/data/User";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useForm } from "react-hook-form";
@@ -119,9 +119,7 @@ function VehicleForm({
     );
 }
 
-export default function VehiclesClientPage({
-    vehicles,
-}: VehiclesClientPageProps) {
+export default function VehiclesClientPage() {
     const { data: currentUser, isLoading, error } = useCurrentUser();
 
     const [allVehicles, setAllVehicles] = useState<ElectricVehicle[]>([]);

@@ -41,12 +41,19 @@ export async function fetchVehicleById(
     }
 
     const data = await response.json();
-    return ElectricVehicle.parse(data); // Validate response
+    return ElectricVehicle.array().parse(data)[0]; // Validate response
 }
 
 // Create a new vehicle
-export async function createVehicle(vehicle: NewVehicle): Promise<void> {
-    const params = new URLSearchParams(vehicle as Record<string, string>);
+export async function createVehicle(
+    vehicle: ElectricVehicle
+): Promise<ElectricVehicle> {
+    const params = new URLSearchParams(
+        Object.entries(vehicle).reduce((acc, [key, value]) => {
+            acc[key] = String(value);
+            return acc;
+        }, {} as Record<string, string>)
+    );
     const response = await fetch(
         `${BASE_URL}/ElectricVehicle/AddElectricVehicle/?${params.toString()}`,
         {
@@ -60,13 +67,21 @@ export async function createVehicle(vehicle: NewVehicle): Promise<void> {
     if (!response.ok) {
         throw new Error(`Error creating vehicle: ${response.statusText}`);
     }
+
+    const data = await response.json();
+    return ElectricVehicle.array().parse(data)[0]; // Validate response
 }
 
 // Update an existing vehicle
 export async function updateVehicle(
     vehicle: ElectricVehicle
 ): Promise<ElectricVehicle> {
-    const params = new URLSearchParams(vehicle as Record<string, string>);
+    const params = new URLSearchParams(
+        Object.entries(vehicle).reduce((acc, [key, value]) => {
+            acc[key] = String(value);
+            return acc;
+        }, {} as Record<string, string>)
+    );
     const response = await fetch(
         `${BASE_URL}/ElectricVehicle/UpdateElectricVehicle/?${params.toString()}`,
         {
@@ -103,8 +118,13 @@ export async function deleteVehicle(ev_id: number): Promise<void> {
 }
 
 // Add a new vehicle
-export async function addNewVehicle(vehicle: NewVehicle): Promise<void> {
-    const params = new URLSearchParams(vehicle as Record<string, string>);
+export async function addNewVehicle(vehicle: ElectricVehicle): Promise<void> {
+    const params = new URLSearchParams(
+        Object.entries(vehicle).reduce((acc, [key, value]) => {
+            acc[key] = String(value);
+            return acc;
+        }, {} as Record<string, string>)
+    );
     const response = await fetch(
         `${BASE_URL}/ElectricVehicle/AddElectricVehicle/?${params.toString()}`,
         {
@@ -124,7 +144,12 @@ export async function addNewVehicle(vehicle: NewVehicle): Promise<void> {
 export async function addOwnedVehicle(
     ownedVehicle: OwnedVehicle
 ): Promise<void> {
-    const params = new URLSearchParams(ownedVehicle as Record<string, string>);
+    const params = new URLSearchParams(
+        Object.entries(ownedVehicle).reduce((acc, [key, value]) => {
+            acc[key] = String(value);
+            return acc;
+        }, {} as Record<string, string>)
+    );
     const response = await fetch(
         `${BASE_URL}/OwnsEV/InsertOwnedVehicle/?${params.toString()}`,
         {

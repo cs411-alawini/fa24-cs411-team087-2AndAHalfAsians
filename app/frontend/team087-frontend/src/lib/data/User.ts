@@ -1,5 +1,5 @@
 import { BASE_URL } from "@/lib/query";
-import { User, ElectricVehicleArray } from "@/schemas";
+import { User, ElectricVehicle, ElectricVehicleArray } from "@/schemas";
 
 // Fetch a user's data by ID
 export async function fetchUser(userId: string): Promise<User> {

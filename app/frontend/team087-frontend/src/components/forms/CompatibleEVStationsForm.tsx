@@ -4,11 +4,13 @@ import { Button, Stack, TextInput, Title, Select } from "@mantine/core";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+    ElectricVehicle,
     CompatibleEVStationsForm,
     CompatibleEVStationsSchema,
 } from "@/schemas";
 import { useMutation } from "@tanstack/react-query";
 import { getCompatibleStations } from "@/lib/data/EVStation";
+import { CompatibleEVStation } from "@/interfaces/interfaces";
 
 interface CompatibleEVStationsFormProps {
     onStationsFetched: (stations: CompatibleEVStation[]) => void;
@@ -69,11 +71,13 @@ export default function CompatibleEVStationsFormComponent({
                     <Select
                         label="EV ID"
                         placeholder="Select your vehicle"
-                        data={ownedVehicles.map((vehicle) => ({
-                            value: vehicle.ev_id.toString(),
-                            label: `${vehicle.make} ${vehicle.model}`,
-                        }))}
-                        onChange={(value) => setValue("ev_id", value)} // Set value as string
+                        data={ownedVehicles
+                            .filter((vehicle) => !!vehicle.ev_id)
+                            .map((vehicle) => ({
+                                value: vehicle.ev_id?.toString() || "",
+                                label: `${vehicle.make} ${vehicle.model}`,
+                            }))}
+                        onChange={(value) => setValue("ev_id", value || "")} // Set value as string
                         error={formState.errors.ev_id?.message}
                     />
                 ) : (

@@ -15,6 +15,7 @@ import {
 import Map from "@/components/map/Map";
 import { Marker, Popup, useMap } from "react-leaflet";
 import {
+    ElectricVehicle,
     CompatibleEVStationsForm,
     CompatibleEVStationsSchema,
 } from "@/schemas";
@@ -43,7 +44,7 @@ export default function MapPage() {
 
     useEffect(() => {
         if (currentUser) {
-            fetchOwnedVehicles(currentUser.user_id).then(setOwnedVehicles);
+            fetchOwnedVehicles(currentUser.user_id.toString()).then(setOwnedVehicles);
         }
     }, [currentUser]);
 
