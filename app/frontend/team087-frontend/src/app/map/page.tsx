@@ -14,7 +14,7 @@ import {
     Table,
     Space,
 } from "@mantine/core";
-import Map from "@/components/map/Map";
+import Map from "@/components/map";
 import { Marker, Popup, useMap } from "react-leaflet";
 import {
     ElectricVehicle,
@@ -24,6 +24,7 @@ import {
 import { latLng, LatLng, LatLngExpression, LeafletMouseEvent } from "leaflet";
 import {
     CompatibleEVStation,
+    CongestionScoreForEVStationsResults,
     GetBestElectricVehiclesForTripResults,
 } from "@/interfaces/interfaces";
 import { getCompatibleStations } from "@/lib/data/EVStation";
@@ -39,6 +40,13 @@ import BestEVsTable from "@/components/common/BestEVsTable";
 import RoutingMachine from "@/components/map/RoutingMachine";
 import HeatmapLayer from "@/components/map/HeatmapLayer";
 import CongestionScoreFormComponent from "@/components/forms/CongestionScoreForm";
+import PlugInstanceStatsFormComponent from "@/components/forms/PlugInstanceStatsForm";
+import PlugInstanceStatsTable from "@/components/common/PlugInstanceStatsTable";
+import {
+    GetPlugInstanceStatsResults,
+    GetPlugTypeResults,
+} from "@/interfaces/interfaces";
+
 
 function MapControl({
     selectedTab,
@@ -112,6 +120,10 @@ export default function MapPage() {
         0.65: "lime",
         1: "red",
     });
+
+    const [plugInstanceStats, setPlugInstanceStats] = useState<
+        GetPlugInstanceStatsResults[]
+    >([]);
 
     function handleHeatmapDataFetched(
         data: CongestionScoreForEVStationsResults[]
@@ -189,9 +201,10 @@ export default function MapPage() {
                         selectedTab={selectedTab}
                         onMapClick={handleOnMapClick}
                     />
-                    {selectedTab && selectedTab === "compatible-stations" && (
+                    {selectedTab === "compatible-stations" && (
                         <EVStationMarkers stations={stations} />
                     )}
+
                     {selectedTab === "view-congestion-heatmap" && (
                         <HeatmapLayer
                             points={heatmapPoints}
@@ -203,7 +216,8 @@ export default function MapPage() {
                             gradient={heatmapGradient}
                         />
                     )}
-                    {selectedTab && selectedTab === "best-evs" && (
+
+                    {selectedTab === "best-evs" && (
                         <>
                             <Marker
                                 draggable={true}
@@ -247,7 +261,9 @@ export default function MapPage() {
                             View Congestion Heatmap
                         </Tabs.Tab>
                         <Tabs.Tab value="best-evs">Best EVs for Trip</Tabs.Tab>
-                        <Tabs.Tab value="query-4">Query 4</Tabs.Tab>
+                        <Tabs.Tab value="plug-stats">
+                            Plug Instance Stats
+                        </Tabs.Tab>
                     </Tabs.List>
 
                     <Tabs.Panel value="compatible-stations" pt="sm">
@@ -285,8 +301,15 @@ export default function MapPage() {
                         <Space h="md" />
                         {bestEVs.length > 0 && <BestEVsTable data={bestEVs} />}
                     </Tabs.Panel>
-                    <Tabs.Panel value="query-4" pt="sm">
-                        There should be a button here
+                    <Tabs.Panel value="plug-stats" pt="sm">
+                        <PlugInstanceStatsFormComponent
+                            onResultsFetched={setPlugInstanceStats}
+                            selectedLocation={selectedLocation}
+                        />
+                        <Space h="md" />
+                        {plugInstanceStats.length > 0 && (
+                            <PlugInstanceStatsTable data={plugInstanceStats} />
+                        )}
                     </Tabs.Panel>
                 </Tabs>
             </Card>

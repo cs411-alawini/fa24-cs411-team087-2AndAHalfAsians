@@ -130,3 +130,14 @@ export const CongestionScoreForEVStationsSchema = z.object({
 export type CongestionScoreForEVStationsParams = z.infer<
     typeof CongestionScoreForEVStationsSchema
 >;
+
+// Plug Stats
+export const GetPlugInstanceStatsSchema = z.object({
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    distance_threshold: z.number().min(0),
+});
+
+export type GetPlugInstanceStatsParams = z.infer<
+    typeof GetPlugInstanceStatsSchema
+>;

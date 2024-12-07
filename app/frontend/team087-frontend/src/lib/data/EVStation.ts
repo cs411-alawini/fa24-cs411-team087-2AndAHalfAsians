@@ -137,3 +137,62 @@ export async function getCongestionScoreForEVStations(
         throw error;
     }
 }
+
+import {
+    GetPlugInstanceStatsParams,
+    GetPlugInstanceStatsResults,
+    GetPlugTypeParams,
+    GetPlugTypeResults,
+} from "@/interfaces/interfaces";
+
+export async function getPlugInstanceStats(
+    data: GetPlugInstanceStatsParams
+): Promise<GetPlugInstanceStatsResults[]> {
+    try {
+        const params = new URLSearchParams({
+            latitude: data.latitude.toString(),
+            longitude: data.longitude.toString(),
+            distance_threshold: data.distance_threshold.toString(),
+        });
+
+        const response = await fetch(
+            `${BASE_URL}/CustomQueries/GetPlugInstanceStats/?${params.toString()}`
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Error fetching plug instance stats: ${response.statusText}`
+            );
+        }
+
+        const results: GetPlugInstanceStatsResults[] = await response.json();
+        return results;
+    } catch (error) {
+        console.error("Failed to fetch plug instance stats:", error);
+        throw error;
+    }
+}
+
+export async function getPlugType(
+    data: GetPlugTypeParams
+): Promise<GetPlugTypeResults> {
+    try {
+        const params = new URLSearchParams({
+            type_id: data.type_id.toString(),
+        });
+
+        const response = await fetch(
+            `${BASE_URL}/CustomQueries/GetPlugType/?${params.toString()}`
+        );
+
+        if (!response.ok) {
+            throw new Error(`Error fetching plug type: ${response.statusText}`);
+        }
+
+        const result: GetPlugTypeResults = await response.json();
+        return result;
+    } catch (error) {
+        console.error("Failed to fetch plug type:", error);
+        throw error;
+    }
+}

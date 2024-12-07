@@ -77,7 +77,7 @@ export const getCongestionScore = async (
     longitude: string,
     distance_threshold: string,
     hour_range: string,
-    hour_of_day: string 
+    hour_of_day: string
 ): Promise<CongestionScore[]> => {
     const apiURL: string = `${BASE_URL}/CustomQueries/CongestionScore/?latitude=${latitude}&longitude=${longitude}&distance_threshold=${distance_threshold}&hour_range=${hour_range}&current_hour=${hour_of_day}`;
     const response = await fetch(apiURL);
@@ -86,7 +86,7 @@ export const getCongestionScore = async (
     const results = response.json();
     console.log("JSON results", results);
     return results;
-}
+};
 
 export const executeOwnsEVQuery = async (
     mode: string,
@@ -196,4 +196,50 @@ export interface GetBestElectricVehiclesForTripParams {
     city2_latitude: number;
     city2_longitude: number;
     distance_threshold: number;
+}
+
+export interface CongestionScoreForEVStationsParams {
+    latitude: number;
+    longitude: number;
+    distance_threshold: number;
+    hour_range: number;
+    current_hour: number;
+    max_congestion_value_range: number;
+    softmax_temp: number;
+}
+
+export interface CongestionScoreForEVStationsResults {
+    ev_station_id: number;
+    distance_km: number;
+    name: string;
+    address: string;
+    state: string;
+    zip: number;
+    latitude: number;
+    longitude: number;
+    city: string;
+    phone: string;
+    CongestionScore: number;
+}
+
+export interface GetPlugInstanceStatsParams {
+    latitude: number;
+    longitude: number;
+    distance_threshold: number;
+}
+
+export interface GetPlugInstanceStatsResults {
+    type_id: number;
+    type_count: number;
+    avg_base_price: number;
+    avg_useage_price: number;
+}
+
+export interface GetPlugTypeParams {
+    type_id: number;
+}
+
+export interface GetPlugTypeResults {
+    type_id: number;
+    type_name: string;
 }

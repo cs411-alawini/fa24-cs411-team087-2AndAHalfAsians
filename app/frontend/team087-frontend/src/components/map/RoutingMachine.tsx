@@ -8,7 +8,6 @@ import "leaflet-routing-machine";
 
 interface RoutingMachineProps {
     waypoints: L.LatLng[];
-    onCreateRoute: (e: unknown) => void;
 }
 
 const RoutingMachine = ({ waypoints }: RoutingMachineProps) => {
