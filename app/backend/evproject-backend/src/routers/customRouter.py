@@ -65,6 +65,49 @@ async def getCompatibleStations(
             results.append(row)
     return results
 
+@router.get("/GetPlugInstanceStats/")
+async def getPlugInstanceStats(
+    latitude: float = Query(34.040539, description='Latitude of first point', ge=-90, le=90),
+    longitude: float = Query(-118.271387, description='Longitude of first point', ge=-180, le=180),
+    distance_threshold: float = Query(40, description='Range to search for vehicles'),
+):
+    '''
+    An endpoint which gets all the PlugInstances within a range based on their type.
+    
+    Arguments:
+        latitude: Current latitude
+        longitude: Current longitude
+        distance_threshold: How many km to return results from
+        
+    
+    Returns:
+        A list of records fetched meeting the constraints. 
+        Returned attributes are defined from the Q5 returns.
+    '''
+    
+    with getDBCursor() as cursor:
+        
+        # Get the parameters for the procedure itself
+        procedureParams = {
+            'latitude': latitude,
+            'longitude': longitude,
+            'distance_threshold': distance_threshold,
+            'target_table': 'EVStation',
+        }
+        
+        
+        # We don't really care too much about reading messy data here
+        # Plus we really need to not block stuff since we're grabbing a bunch of records
+        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
+        cursor.execute(load_query("get_stat_pluginstance", query_path='queries/Custom'))
+        
+        results = []
+        for row in cursor:
+            results.append(row)
+    return results
+
+
 
 @router.get("/CongestionScore/")
 async def getCongestionScore(
