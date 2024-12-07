@@ -50,6 +50,10 @@ tagsData = [
     {
         'name': 'ElectricVehicle',
         'description': 'All ElectricVehicle related queries'
+    },
+    {
+        'name': 'PlugType',
+        'description': 'All PlugType related queries'
     }
 ]
 

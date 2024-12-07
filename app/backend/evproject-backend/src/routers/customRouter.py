@@ -162,6 +162,10 @@ async def getCongestionScore(
         tLongs = np.array([r['longitude'] for r in trafficStationResults], dtype=np.float32)
         congestionScores = np.array([r['CongestionScore'] for r in trafficStationResults])
         
+        # Return nothing if we can't find anything
+        if len(evStationResults) == 0 or len(trafficStationResults) == 0:
+            return []
+        
         weightedCongestionScores = np.zeros((len(evStationResults)))
 
         distances = haversine(tLats, tLongs, evStationLatLong[:, 0], evStationLatLong[:, 1])
