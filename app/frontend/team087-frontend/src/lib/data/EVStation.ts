@@ -56,6 +56,18 @@ export async function getCompatibleStations(
 
         // Parse and return the JSON response
         const stations: CompatibleEVStation[] = await response.json();
+
+        // FOR DEMO PURPOSES //
+
+        // Set the in_use of 10% of stations randomly
+        stations.forEach((station) => {
+            if (Math.random() < 0.3) {
+                station.in_use = 1;
+            }
+        });
+
+        ///////////////////////
+
         return stations;
     } catch (error) {
         console.error("Failed to fetch compatible EV stations:", error);
