@@ -115,3 +115,18 @@ export const GetBestElectricVehiclesForTripSchema = z.object({
 export type GetBestElectricVehiclesForTripParams = z.infer<
     typeof GetBestElectricVehiclesForTripSchema
 >;
+
+// Heatmap
+export const CongestionScoreForEVStationsSchema = z.object({
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
+    distance_threshold: z.number().min(0),
+    hour_range: z.number().min(0),
+    current_hour: z.number().min(0).max(23),
+    max_congestion_value_range: z.number().min(0),
+    softmax_temp: z.number().min(0),
+});
+
+export type CongestionScoreForEVStationsParams = z.infer<
+    typeof CongestionScoreForEVStationsSchema
+>;

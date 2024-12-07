@@ -98,3 +98,42 @@ export async function getBestElectricVehiclesForTrip(
         throw error;
     }
 }
+
+import {
+    CongestionScoreForEVStationsParams,
+    CongestionScoreForEVStationsResults,
+} from "@/interfaces/interfaces";
+
+export async function getCongestionScoreForEVStations(
+    data: CongestionScoreForEVStationsParams
+): Promise<CongestionScoreForEVStationsResults[]> {
+    try {
+        const params = new URLSearchParams({
+            latitude: data.latitude.toString(),
+            longitude: data.longitude.toString(),
+            distance_threshold: data.distance_threshold.toString(),
+            hour_range: data.hour_range.toString(),
+            current_hour: data.current_hour.toString(),
+            max_congestion_value_range:
+                data.max_congestion_value_range.toString(),
+            softmax_temp: data.softmax_temp.toString(),
+        });
+
+        const response = await fetch(
+            `${BASE_URL}/CustomQueries/CongestionScoreForEVStations/?${params.toString()}`
+        );
+
+        if (!response.ok) {
+            throw new Error(
+                `Error fetching congestion score: ${response.statusText}`
+            );
+        }
+
+        const results: CongestionScoreForEVStationsResults[] =
+            await response.json();
+        return results;
+    } catch (error) {
+        console.error("Failed to fetch congestion score:", error);
+        throw error;
+    }
+}

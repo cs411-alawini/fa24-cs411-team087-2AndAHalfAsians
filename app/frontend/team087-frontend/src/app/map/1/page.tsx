@@ -36,6 +36,9 @@ import { EVStationMarkers } from "@/components/map/MapMarkers";
 import { fetchOwnedVehicles } from "@/lib/data/User";
 import BestEVsForTripFormComponent from "@/components/forms/BestEVsForTripForm";
 import BestEVsTable from "@/components/common/BestEVsTable";
+import RoutingMachine from "@/components/map/RoutingMachine";
+import HeatmapLayer from "@/components/map/HeatmapLayer";
+import CongestionScoreFormComponent from "@/components/forms/CongestionScoreForm";
 
 function MapControl({
     selectedTab,
@@ -48,27 +51,29 @@ function MapControl({
     map.doubleClickZoom.disable();
 
     useEffect(() => {
-        switch (selectedTab) {
-            case "compatible-stations":
-                map.dragging.enable();
-                map.touchZoom.enable();
-                break;
-            case "view-congestion-heatmap":
-                map.dragging.disable();
-                map.touchZoom.disable();
-                break;
-            case "query-3":
-                map.dragging.disable();
-                map.touchZoom.disable();
-                break;
-            case "query-4":
-                map.dragging.disable();
-                map.touchZoom.disable();
-                break;
+        // switch (selectedTab) {
+        //     case "compatible-stations":
+        //         map.dragging.enable();
+        //         map.touchZoom.enable();
+        //         break;
+        //     case "view-congestion-heatmap":
+        //         map.dragging.disable();
+        //         map.touchZoom.disable();
+        //         break;
+        //     case "query-3":
+        //         map.dragging.disable();
+        //         map.touchZoom.disable();
+        //         break;
+        //     case "query-4":
+        //         map.dragging.disable();
+        //         map.touchZoom.disable();
+        //         break;
 
-            default:
-                break;
-        }
+        //     default:
+        //         break;
+        // }
+
+        map.on("dblclick", onMapClick);
 
         return () => {
             map.off("dblclick", onMapClick);
@@ -92,14 +97,44 @@ export default function MapPage() {
         GetBestElectricVehiclesForTripResults[]
     >([]);
 
+    const [heatmapPoints, setHeatmapPoints] = useState<
+        [number, number, number][]
+    >([]);
+    const [heatmapRadius, setHeatmapRadius] = useState(25);
+    const [heatmapBlur, setHeatmapBlur] = useState(15);
+    const [heatmapMax, setHeatmapMax] = useState(1.0);
+    const [heatmapMaxZoom, setHeatmapMaxZoom] = useState(17);
+    const [heatmapMinOpacity, setHeatmapMinOpacity] = useState(0.1);
+    const [heatmapGradient, setHeatmapGradient] = useState<{
+        [key: number]: string;
+    }>({
+        0.4: "blue",
+        0.65: "lime",
+        1: "red",
+    });
+
+    function handleHeatmapDataFetched(
+        data: CongestionScoreForEVStationsResults[]
+    ) {
+        const points = data.map(
+            (item) =>
+                [item.latitude, item.longitude, item.CongestionScore] as [
+                    number,
+                    number,
+                    number,
+                ]
+        );
+        setHeatmapPoints(points);
+    }
+
     const startMarkerRef = useRef(null);
     const [startPosition, setStartPosition] = useState<LatLng>(
-        new LatLng(34.040539, -118.271387)
+        new LatLng(39.8416184160534, -81.21093750000001)
     );
 
     const endMarkerRef = useRef(null);
     const [endPosition, setEndPosition] = useState<LatLng>(
-        new LatLng(34.040539, -118.271387)
+        new LatLng(40.24590854666475, -115.751953125)
     );
 
     function handleOnMapClick(e: LeafletMouseEvent) {
@@ -157,6 +192,17 @@ export default function MapPage() {
                     {selectedTab && selectedTab === "compatible-stations" && (
                         <EVStationMarkers stations={stations} />
                     )}
+                    {selectedTab === "view-congestion-heatmap" && (
+                        <HeatmapLayer
+                            points={heatmapPoints}
+                            radius={heatmapRadius}
+                            blur={heatmapBlur}
+                            max={heatmapMax}
+                            maxZoom={heatmapMaxZoom}
+                            minOpacity={heatmapMinOpacity}
+                            gradient={heatmapGradient}
+                        />
+                    )}
                     {selectedTab && selectedTab === "best-evs" && (
                         <>
                             <Marker
@@ -178,6 +224,9 @@ export default function MapPage() {
                                 }}
                                 position={endPosition}
                                 ref={endMarkerRef}
+                            />
+                            <RoutingMachine
+                                waypoints={[startPosition, endPosition]}
                             />
                         </>
                     )}
@@ -210,7 +259,22 @@ export default function MapPage() {
                     </Tabs.Panel>
 
                     <Tabs.Panel value="view-congestion-heatmap" pt="sm">
-                        There should be a button here
+                        <CongestionScoreFormComponent
+                            onResultsFetched={handleHeatmapDataFetched}
+                            selectedLocation={selectedLocation}
+                            onRadiusChange={setHeatmapRadius}
+                            radius={heatmapRadius}
+                            onBlurChange={setHeatmapBlur}
+                            blur={heatmapBlur}
+                            onMaxChange={setHeatmapMax}
+                            max={heatmapMax}
+                            onMaxZoomChange={setHeatmapMaxZoom}
+                            maxZoom={heatmapMaxZoom}
+                            onMinOpacityChange={setHeatmapMinOpacity}
+                            minOpacity={heatmapMinOpacity}
+                            onGradientChange={setHeatmapGradient}
+                            gradient={heatmapGradient}
+                        />
                     </Tabs.Panel>
                     <Tabs.Panel value="best-evs" pt="sm">
                         <BestEVsForTripFormComponent
