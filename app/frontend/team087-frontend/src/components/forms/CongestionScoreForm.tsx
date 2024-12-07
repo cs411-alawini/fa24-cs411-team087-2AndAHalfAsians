@@ -196,7 +196,7 @@ export default function CongestionScoreFormComponent({
                 <ColorInput
                     key={key}
                     label={`Gradient ${key}`}
-                    value={gradient[key]}
+                    value={gradient[Number(key)]}
                     onChange={(color) =>
                         handleGradientChange(Number(key), color)
                     }

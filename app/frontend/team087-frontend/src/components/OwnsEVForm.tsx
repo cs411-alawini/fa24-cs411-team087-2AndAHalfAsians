@@ -2,7 +2,7 @@
 
 import { useState, ChangeEvent, FormEvent } from "react";
 import { Button, Box, Group, Paper, Divider, TextInput } from "@mantine/core";
-import CRUDDropdownList from "@/components/CRUDDropdownList";
+import CRUDDropdownList from "@/components/old_map/CRUDDropdownList";
 import { executeOwnsEVQuery } from "@/interfaces/interfaces";
 import { ElectricVehicle } from "@/interfaces/interfaces";
 import QueryResults from "./QueryResults";

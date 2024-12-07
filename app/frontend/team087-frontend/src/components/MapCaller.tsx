@@ -9,7 +9,7 @@ interface MapCallerProps {
     props1: CongestionScore[];
 }
 
-const LazyMap = dynamic(() => import("@/components/Map"), {
+const LazyMap = dynamic(() => import("@/components/old_map/Map"), {
     ssr: false,
     loading: () => <p>Loading...</p>,
 });

@@ -1,15 +1,14 @@
 "use client";
 
-import { CompatibleEVStation } from "@/interfaces/interfaces";
 import dynamic from "next/dynamic";
 
-const LazyMap = dynamic(() => import("@/components/map/Map"), {
+const LazyMap = dynamic(() => import("@/components/map"), {
     ssr: false,
     loading: () => <p>Loading...</p>,
 });
 
 function MapCaller({ children }: { children: React.ReactNode }) {
-    return <LazyMap children={children} />;
+    return <LazyMap>{children}</LazyMap>;
 }
 
 export default MapCaller;
