@@ -46,8 +46,13 @@ gcloud run services set-iam-policy evproject-backend-service gcr-service-policy.
 ## Structure Overview
 
 `main.py`: The entry point for the backend, adds routers as needed
+
 `routers/`: The folder containing individual endpoints for each "group" of queries we need to run
+
 `queries/`: The folder containing formatted SQL queries for use with the python mySQL library
+
 `db_connection.py`: Handles the majority of connection management and overall transaction control
+
 `query_loader.py`: Handles loading queries from the `queries` directory
+
 `utils.py`: Misc utility functions
