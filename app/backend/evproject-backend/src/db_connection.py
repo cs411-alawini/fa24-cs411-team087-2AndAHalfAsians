@@ -3,14 +3,17 @@ from mysql.connector import Error
 from mysql.connector.cursor import MySQLCursor
 import os
 from contextlib import contextmanager
-from typing import Optional, Generator, Dict
+from typing import Optional, Generator
 
 import mysql.connector.cursor
 
+# TODO: This should really be refactored to manage connections better
+#   I'm no systems expert but I think we should have a queue for incoming requests
+#   and then handle those individually instead of making this the bottleneck but it works well enough
 class DatabaseConnectionPool:
 
     _connectionPool = None
-    _poolSize = 5
+    _poolSize = 10
     
     # The @classmethod decorator lets us interact easily with the class variables.
     # Class variables are different from instance variables since they are shared
@@ -28,6 +31,7 @@ class DatabaseConnectionPool:
             return
 
         try:
+            # Yes, anyone on the internet is allowed full access to the database. No I don't care
             poolConfig = {
                 "pool_name": "primary_pool", # No spaces allowed in the pool name I guess?
                 "pool_size": cls._poolSize,

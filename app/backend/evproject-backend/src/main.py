@@ -1,13 +1,9 @@
-from fastapi import FastAPI, Query, HTTPException, status, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Union
 import uvicorn
-from src.db_connection import DatabaseConnectionPool, getDBCursor
-from mysql.connector import errorcode, Error
+from src.db_connection import DatabaseConnectionPool
 
-from src.query_loader import load_query
 import importlib
-
 import os
 
 
@@ -22,9 +18,10 @@ import os
 #   If we call a(a(a(a(params)))) are we making 4 separate cursors which each have their own
 #   connection? If so we could easily run out so it may be better to pass in the existing cursor
 #   if possible. If we do this, we would have to be more careful about transaction and failure management
+#   -- UPDATE
+#   I have decided it is "good enough"
 
-# TODO: All these queries will probably explode, should add better error handling
-# TODO: Refactor this into separate routes? It was pretty rough getting the imports to work though with GCP
+# TODO: Really should get around to error handling at some point, whatever
 
 tagsData = [
     {
@@ -77,7 +74,7 @@ app.add_middleware(
 )
 
 
-# Dynamically load routers
+# Dynamically load routers (ty David)
 def include_all_routers(app: FastAPI, routers_dir: str = "src/routers"):
     """
     Dynamically discover and include routers from the routers directory.

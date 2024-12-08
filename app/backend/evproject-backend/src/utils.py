@@ -102,6 +102,8 @@ def haversine(tLats:np.ndarray, tLongs:np.ndarray, eLats:np.ndarray, eLongs:np.n
     """
     Calculate haversine distance
     Slightly modified from https://stackoverflow.com/questions/4913349/haversine-formula-in-python-bearing-and-distance-between-two-gps-points
+    although this could have been done with a library or something. 
+    (I vectorized it by flexing my epic numpy skills and saved 0.05s (The query+internet latency is much worse which makes this almost pointless (I don't care)))
     """
     # Convert decimal degrees to radians
     lat1, long1 = np.radians(tLats), np.radians(tLongs)
@@ -116,4 +118,8 @@ def haversine(tLats:np.ndarray, tLongs:np.ndarray, eLats:np.ndarray, eLongs:np.n
     return c * r
 
 def softmax(x, temp):
+    '''
+    The softmax function with temperature, vectorized with numpy
+    '''
+    # Numpy doesn't have a built-in softmax function for some reason
     return np.exp(x/temp) / (np.sum(np.exp(x/temp), axis=1))[:, None]

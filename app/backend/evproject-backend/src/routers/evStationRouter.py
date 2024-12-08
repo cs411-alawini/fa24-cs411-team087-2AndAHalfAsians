@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from src.db_connection import getDBCursor
-from mysql.connector import errorcode, Error
 from src.query_loader import load_query
-from src.utils import genericInsertQuery, genericReadQuery, genericUpdateQuery, genericDeleteQuery
+from src.utils import genericReadQuery
 
 router = APIRouter(
     prefix='/EVStation',

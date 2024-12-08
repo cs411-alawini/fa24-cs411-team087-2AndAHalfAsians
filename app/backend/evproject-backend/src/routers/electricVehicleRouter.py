@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from src.db_connection import getDBCursor
-from mysql.connector import errorcode, Error
 from src.query_loader import load_query
 from src.utils import genericInsertQuery, genericUpdateQuery, genericDeleteQuery, genericReadQuery
 
@@ -29,7 +28,8 @@ async def addElectricVehicle(
 
     with getDBCursor() as cursor:
 
-        cursor.execute(load_query('read_uncommitted'))
+        # Extremely rare, so this is probably fine
+        cursor.execute(load_query('serializable'))
         cursor.execute(genericInsertQuery(table=TABLE, params=params), params)
         ev_id = cursor.lastrowid
 
@@ -45,7 +45,7 @@ async def getElectricVehicleByEvId(
     params = {key: value for key, value in locals().items() if key != 'self'}
 
     with getDBCursor() as cursor:
-
+        # We want to read EVs if they actually exist, otherwise we may break other queries
         cursor.execute(load_query('read_committed'))
         cursor.execute(genericReadQuery(table=TABLE, key='ev_id'), params)
 
@@ -58,8 +58,8 @@ async def getElectricVehicleByEvId(
 async def getAllElectricVehicles():
     
     with getDBCursor() as cursor:
-        
-        cursor.execute(load_query('read_uncommitted'))
+        # We want to read EVs if they actually exist, otherwise we may break other queries
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query('get_all_electric_vehicles', query_path='queries/ElectricVehicle'))
         
         results = cursor.fetchall()

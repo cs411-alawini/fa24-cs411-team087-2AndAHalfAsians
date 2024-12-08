@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from src.db_connection import getDBCursor
-from mysql.connector import errorcode, Error
 from src.query_loader import load_query
 from src.utils import genericReadQuery, genericInsertQuery, genericDeleteQuery, genericUpdateQuery
 
@@ -33,8 +32,7 @@ async def getPlugInstancesFromStation(
 ):
     params = {key: value for key, value in locals().items() if key != 'self'}
     with getDBCursor() as cursor:
-        # Don't really care if we miss a single plug, plus it would be crazy rare
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query('get_plug_instances_from_station', query_path='queries/PlugInstance'), params)
         results = cursor.fetchall()
     return results
@@ -61,8 +59,7 @@ async def addPlugInstance(
             'usage_price': usage_price
         }
         
-        # Inserts don't need anything special
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(genericInsertQuery(table=TABLE, params=insertionParams), insertionParams)
         instance_id = cursor.lastrowid
         
@@ -87,8 +84,7 @@ async def updatePlugInstance(
 ):
     params = {key: value for key, value in locals().items() if key != 'self'}
     with getDBCursor() as cursor:
-        # Construct an update query to only include non-None values
-        cursor.execute(load_query('serializable'))
+        cursor.execute(load_query('read_committed'))
         UPDATE_QUERY = genericUpdateQuery(table=TABLE, key='instance_id', params=params)
         cursor.execute(UPDATE_QUERY, params)
     return await getPlugInstance(instance_id=instance_id)

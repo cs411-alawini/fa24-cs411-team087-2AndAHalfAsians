@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from src.db_connection import getDBCursor
-from mysql.connector import errorcode, Error
 from src.query_loader import load_query
 from src.utils import genericInsertQuery, genericUpdateQuery, genericReadQuery, genericDeleteQuery
 
@@ -35,7 +34,7 @@ async def addUser(
 
     with getDBCursor() as cursor:
 
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(genericInsertQuery(table=TABLE, params=params), params)
         # Get the auto-incremented user_id with cursor.lastrowid
         user_id = cursor.lastrowid

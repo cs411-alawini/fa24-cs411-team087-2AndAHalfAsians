@@ -57,7 +57,7 @@ async def updateOwnedVehicle(
     with getDBCursor() as cursor:
         try:
             # Perform update and return new results
-            cursor.execute(load_query('serializable'))
+            cursor.execute(load_query('read_committed'))
             cursor.execute(load_query('update_owned_vehicle', query_path='queries/OwnsEV'), params)
         
         # Need to handle issues like if someone tries to enter a non-existent ev_id
@@ -113,7 +113,7 @@ async def insertOwnedVehicle(
         
         try:
             # We should be able to insert this whenever, nothing else is probably going to be affected
-            cursor.execute(load_query('read_uncommitted'))
+            cursor.execute(load_query('read_committed'))
             cursor.execute(genericInsertQuery(table=TABLE, params=params), params)
             
         # Need to handle issues like if someone tries to enter a non-existent ev_id
@@ -157,7 +157,7 @@ async def deleteOwnedVehicle(
 
     with getDBCursor() as cursor:
         
-        cursor.execute(load_query('serializable'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query('delete_owned_vehicle', query_path='queries/OwnsEV'), params)
     
     return await getOwnedVehicles(user_id)

@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 from src.db_connection import getDBCursor
-from mysql.connector import errorcode, Error
 from src.query_loader import load_query
 from src.utils import haversine, softmax
 import numpy as np
@@ -56,13 +55,12 @@ async def getCompatibleStations(
         
         # We don't really care too much about reading messy data here
         # Plus we really need to not block stuff since we're grabbing a bunch of records
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
         cursor.execute(load_query("compatible_stations_query", query_path='queries/Custom'), queryParams)
         
-        results = []
-        for row in cursor:
-            results.append(row)
+        results = cursor.fetchall()
+        
     return results
 
 @router.get("/GetPlugInstanceStats/")
@@ -98,13 +96,12 @@ async def getPlugInstanceStats(
         
         # We don't really care too much about reading messy data here
         # Plus we really need to not block stuff since we're grabbing a bunch of records
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
         cursor.execute(load_query("get_stat_pluginstance", query_path='queries/Custom'))
         
-        results = []
-        for row in cursor:
-            results.append(row)
+        results = cursor.fetchall()
+
     return results
 
 
@@ -122,6 +119,16 @@ async def getCongestionScore(
     Gets a list of TrafficStation near a given latitude and longitude. Each TrafficStation contributes
     some "CongestionScore" based on how close it is to the given latitude and longitude. Average congestion
     for a given latitude and longitude can be computed by averaging all the CongestionScore values.
+    
+    Arguments:
+        latitude: The latitude to search around
+        longitude: The longitude to search around
+        distance_threshold: The square radius to search (in km)
+        hour_range: How many hours to average data over, we may want data from +/- 2 or 1 hour(s)
+        current_hour: The current hour from 0-23
+    
+    Returns: 
+        A set of TrafficStation records with an additional CongestionScore attribute for each station.
     '''
     
     with getDBCursor() as cursor:
@@ -139,7 +146,7 @@ async def getCongestionScore(
             'distance_threshold': distance_threshold,
         }
         
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
         cursor.execute(load_query('get_congestion_scores', query_path='queries/Custom'), queryParams)
 
@@ -159,7 +166,24 @@ async def getCongestionScore(
     
     '''
     Computes an estimated congestion score for the actual EVStation based on the congestion score
-    for the TrafficStations.
+    for the TrafficStations. We don't actually have the congestion scores for EVStations since the
+    TrafficStation and EVStations aren't in the same place, so we estimate the EVStation's congestion
+    based on the CongestionScores from individual TrafficStations. 
+    
+    We do this by taking a weighted sum for each EVStation of the surrounding TrafficStations, if EVStation 1 
+    is close to a very busy TrafficStation and is far from another busy TrafficStation, the close TrafficStation
+    will contribute more weight.
+    
+    Nothing is returned if there are no nearby EVStations or TrafficStations
+    
+    Arguments: 
+        latitude: The latitude to search around
+        longitude: The longitude to search around
+        distance_threshold: The square radius to search (in km)
+        hour_range: How many hours to average data over, we may want data from +/- 2 or 1 hour(s)
+        current_hour: The current hour from 0-23
+        max_congestion_value_range: The max possible value to be returned for a congestion score
+        softmax_temp: The 'temperature' of the softmax determines how smoothly the far away values fall off, low temps make it a cliff while high temps are gentle slopes
     '''
     
     with getDBCursor() as cursor:
@@ -177,7 +201,7 @@ async def getCongestionScore(
             'distance_threshold': distance_threshold,
         }
         
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
 
         # Compute distances from current location to all TrafficStations and get congestion scores
         cursor.execute(load_query("haversine_distances_procedure", query_path='queries/Custom'), procedureParams)
@@ -210,7 +234,6 @@ async def getCongestionScore(
             return []
         
         weightedCongestionScores = np.zeros((len(evStationResults)))
-
         distances = haversine(tLats, tLongs, evStationLatLong[:, 0], evStationLatLong[:, 1])
 
         # Negate distances to give more weight to small distances
@@ -224,6 +247,7 @@ async def getCongestionScore(
                                                 (np.min(weightedCongestionScores), np.max(weightedCongestionScores)),
                                                 (1, max_congestion_value_range))
 
+        # Update actual CongestionScore values in the results
         for r, wcs in zip(evStationResults, weightedCongestionScores):
             r['CongestionScore'] = wcs
         
@@ -240,11 +264,16 @@ async def getOwnersOfMultipleEvs():
     Gets a list of TrafficStation near a given latitude and longitude. Each TrafficStation contributes
     some "CongestionScore" based on how close it is to the given latitude and longitude. Average congestion
     for a given latitude and longitude can be computed by averaging all the CongestionScore values.
+    
+    Arguments:
+        latitude: The latitude to search around
+        longitude: The longitude to search around
+        distance_threshold: The square radius to search (in km)
     '''
     
     with getDBCursor() as cursor:
         
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query('get_owners_of_multiple_evs', query_path='queries/Custom'))
         
         return cursor.fetchall()
@@ -262,6 +291,11 @@ async def getEVStationsWithHighestNumberOfAvailablePlugs(
     Gets a list of TrafficStation near a given latitude and longitude. Each TrafficStation contributes
     some "CongestionScore" based on how close it is to the given latitude and longitude. Average congestion
     for a given latitude and longitude can be computed by averaging all the CongestionScore values.
+    
+    Arguments:
+        latitude: The latitude to search around
+        longitude: The longitude to search around
+        distance_threshold: The square radius to search (in km)
     '''
     
     with getDBCursor() as cursor:
@@ -288,12 +322,23 @@ async def getBestElectricVehiclesForTrip(
     city2_longitude:float = Query(-122.4194, description='End city long', ge=-180, le=180),
     distance_threshold: float = Query(10, description='Range to consider for EVStations')
 ):
+    '''
+    Gets some results about the different EVs we have if you want to go from one city to another.
+    Returns results based on which car is the most economical based on the charging prices in an area.
+    
+    Arguments:
+        city1_latitude: Latitude of city 1
+        city1_longitude: Longitude of city 1
+        city2_latitude: Latitude of city 2
+        city2_longitude: Longitude of city 2
+        distance_threshold: The square radius to search (in km)
+    '''
 
     params = {key: value for key, value in locals().items() if key != 'self'}
 
     with getDBCursor() as cursor:
         
-        cursor.execute(load_query('read_uncommitted'))
+        cursor.execute(load_query('read_committed'))
         cursor.execute(load_query('get_best_evs_for_trip', query_path='queries/Custom'), params)
         
         return cursor.fetchall()
