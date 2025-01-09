@@ -25,32 +25,32 @@ https://www.fhwa.dot.gov/policyinformation/tables/tmasdata/
 ---
 ## Logging in
 
-![[login.gif]]
+![](attachments/login.gif)
 - Once you access the frontend, you can log in as any user. Logging in using either a user ID or a user name. There are ~10000 user IDs in numerical order, but we use `1` here for demonstration purposes.
 
 ## Editing an Electric Vehicle's stats
-![[editEV.gif]]
+![](attachments/editEV.gif)
 - Showing full CRUD functionality by editing one of the database's electric vehicle records. New EVs can be added, edited, or removed as necessary.
 
 ## Finding Compatible Stations
 
-![[compatibleStations.gif]]
+![](attachments/compatibleStations.gif)
 - When logged in as user 1, we can double click to update the current latitude and longitude (to Las Vegas in this case) and search 20km around that location for compatible EV charging stations for any vehicle tied to this user's account.
 - We can examine each charging station to see additional information about how many charging ports are available, their estimated charging costs, and whether they are in use or not based on their color. By default, we sort these charging stations from cheapest to most expensive with the shade of the color showing how expensive it is.
 
 ## Viewing Traffic Congestion
 
-![[heatmap.gif]]
+![](attachments/heatmap.gif)
 - An example of viewing traffic congestion in Las Vegas around all charging stations. Red areas indicate more congestion and likely higher charge wait times and costs. Heatmap parameters can be adjusted as needed to provide users with the ability to adjust thresholds and spot sizes.
 
 ## Finding Best EV for a Trip
 
-![[bestTripEV.gif]]
+![](attachments/bestTripEV.gif)
 - We can find the cheapest EVs for a trip in 2 cities by moving the pins to places of interest. The search button will compare all EV charging station prices around both pins, and provide the cheapest EVs that can operate in those areas. Some stations are free to charge in, hence why they appear at the top of the list with a cost of 0.
 
 ## Getting Charging Statistics for a City
 
-![[plugInstanceStats.gif]]
+![](attachments/plugInstanceStats.gif)
 - You can search a city to get a list of the count, average base price, and usage prices of all charging stations in an area. This is useful for finding which cities have the most chargers available for any given plug type.
 
 
@@ -59,7 +59,7 @@ https://www.fhwa.dot.gov/policyinformation/tables/tmasdata/
 
 One of the primary focuses for the project was the database itself. We fully constructed a new database schema and populated it with publicly available (or synthesized) data and hosted it on a GCP MySQL server. An ER diagram of our final database schema can be seen here. For more information about the decisions made during development, please see the `docs` folder which contains incremental reports as the project progressed.
 
-![[Pasted image 20250107155633.png]]
+![](attachments/Pasted%20image%2020250107155633.png)
 - The final database schema. 
 
 # How to Run Locally
