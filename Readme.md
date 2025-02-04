@@ -5,7 +5,8 @@ This project is a web application completed for UIUC's CS 411 Database Systems c
 
 The entire project is centered around a MySQL database designed by our team which holds critical data needed for the project like raw EV charging station information, types of electric vehicles, and sample user data. The main functionality of our web application is powered by a variety of advanced SQL queries that can be found in our backend queries. 
 
-> [!NOTE] Accessing this project
+> [!NOTE]
+> **Accessing this project**
 > The frontend for this project is accessible from the following URL:
 > https://team087-frontend-410247726474.us-central1.run.app
 > 
